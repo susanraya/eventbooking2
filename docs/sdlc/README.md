@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic event booking qpp
 
-**Documentation version:** v2
+**Documentation version:** v3
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -15,14 +15,14 @@ basic event booking qpp
 |---|---|
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 22 entries |
-| [Development](development/README.md) | 1 entry |
+| [Development](development/README.md) | 13 entries |
 | [Testing](testing/README.md) | 1 entry |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 1 entry |
 | [Data model](architecture/data-model.md) | generated |
 | [API (OpenAPI)](architecture/api/openapi.yaml) | generated |
 | [Decisions (ADRs)](architecture/adr/README.md) | 4 decisions |
-| [Sprint plan](development/sprint-plan.md) | not generated yet |
+| [Sprint plan](development/sprint-plan.md) | 5 sprints |
 | [Developer guide](development/developer-guide.md) | generated |
 | [API reference](development/api-reference.md) | 1 route |
 | [Test report](testing/test-report.md) | not run yet |
@@ -31,7 +31,7 @@ basic event booking qpp
 | [Runbook](deployment/runbook.md) | not deployed yet |
 | [Release notes](deployment/release-notes.md) | 0 releases |
 | [Traceability matrix](traceability-matrix.md) | 14 requirements |
-| [Changelog](CHANGELOG.md) | 2 versions |
+| [Changelog](CHANGELOG.md) | 3 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -59,7 +59,20 @@ basic event booking qpp
 
 ### Development
 
-- Development has not begun; none of the 14 user stories (US-001..US-014) or 36 acceptance criteria have recorded implementation status.
+- No record of actual sprint execution, completion dates, or velocity achieved against the planned capacity of 20 points/sprint.
+- No indication of who approved the plan or when.
+- No implementation status, test results, or completion confirmation provided for any Sprint 1 item.
+- No implementation status, test results, or completion confirmation provided for any Sprint 2 item.
+- No implementation status, test results, or completion confirmation provided for any Sprint 3 item or its subtasks.
+- No implementation status, test results, or completion confirmation provided for any Sprint 4 item or its subtasks.
+- No evidence yet that overselling protection (concurrency-safe reservation, stock release on failure) was actually verified.
+- No implementation status, test results, or completion confirmation provided for any Sprint 5 item or its subtasks.
+- No implementation or test evidence for this epic's stories.
+- Epic name references DPDP (India's Digital Personal Data Protection Act); no explicit compliance mapping/control documentation was provided beyond the two story titles.
+- No implementation or test evidence for this epic's story or its three tasks.
+- No implementation or test evidence for this epic's stories or tasks.
+- Payment/webhook flow (US-011-T3) and overselling protection (US-011-T1/T4) have no recorded verification.
+- No implementation or test evidence for this epic's story.
 
 ### Testing
 

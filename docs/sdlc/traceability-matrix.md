@@ -9,18 +9,18 @@ Built from recorded links, not written by a model: requirement key → plan item
 <!-- sdlc:auto:start matrix -->
 | Requirement | Epic | Title | Plan items | Sprint | Design | Code | Commits | Ticket | Tests | AC tests | Deployed |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| US-001 | EPIC-001 | Attendee self-registration | — | — | — | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-002 | EPIC-001 | Organizer self-registration | — | — | — | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
-| US-003 | EPIC-001 | Secure sign-in and sign-out | — | — | — | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-004 | EPIC-002 | Explicit consent capture at signup | — | — | — | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-005 | EPIC-002 | Withdraw consent | — | — | — | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
-| US-006 | EPIC-003 | Create an event listing | — | — | — | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
-| US-007 | EPIC-003 | Define general-admission ticket types | — | — | — | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-008 | EPIC-004 | View and manage own events | — | — | — | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-009 | EPIC-005 | Browse and search events by city, date and category | — | — | — | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-010 | EPIC-005 | View event detail page | — | — | — | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
-| US-011 | EPIC-006 | Book and pay for tickets | — | — | — | — | — | not started | not run | 0/4 tested · 0/4 passing | — |
-| US-012 | EPIC-006 | Receive unique QR-code digital tickets | — | — | — | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
-| US-013 | EPIC-006 | My tickets view | — | — | — | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
-| US-014 | EPIC-007 | Use the platform as a responsive web app | — | — | — | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
+| US-001 | EPIC-001 | Attendee self-registration | US-001 | 1 | POST /auth/register, api_backend, db, users, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
+| US-002 | EPIC-001 | Organizer self-registration | US-002 | 1 | POST /auth/register, api_backend, db, organizer_profiles, users, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
+| US-003 | EPIC-001 | Secure sign-in and sign-out | US-003 | 1 | POST /auth/login, POST /auth/logout, api_backend, db, users, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
+| US-004 | EPIC-002 | Explicit consent capture at signup | US-004 | 1 | POST /auth/register, api_backend, consent_records, db, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
+| US-005 | EPIC-002 | Withdraw consent | US-005 | 2 | POST /consent/withdraw, api_backend, consent_records, db, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
+| US-006 | EPIC-003 | Create an event listing | US-006 | 2 | POST /events, api_backend, db, events, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
+| US-007 | EPIC-003 | Define general-admission ticket types | US-007 | 2 | POST /events/{id}/ticket-types, api_backend, db, ticket_types, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
+| US-008 | EPIC-004 | View and manage own events | US-008, US-008-T1, US-008-T2, US-008-T3 | 3 | GET /organizer/events, PUT /events/{id}, api_backend, db, events, orders, ticket_types, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
+| US-009 | EPIC-005 | Browse and search events by city, date and category | US-009, US-009-T1, US-009-T2, US-009-T3 | 3 | GET /events/search, api_backend, cache, events, search, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
+| US-010 | EPIC-005 | View event detail page | US-010 | 2 | GET /events/{id}, api_backend, db, events, ticket_types, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
+| US-011 | EPIC-006 | Book and pay for tickets | US-011, US-011-T1, US-011-T2, US-011-T3, US-011-T4 | 4 | POST /orders, POST /payments/webhook, api_backend, cache, db, order_items, orders, payments, queue, ticket_types, web_app, worker | — | — | not started | not run | 0/4 tested · 0/4 passing | — |
+| US-012 | EPIC-006 | Receive unique QR-code digital tickets | US-012, US-012-T1, US-012-T2 | 5 | GET /me/tickets/{id}, api_backend, db, object_store, queue, tickets, web_app, worker | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
+| US-013 | EPIC-006 | My tickets view | US-013 | 5 | GET /me/tickets, api_backend, db, orders, tickets, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
+| US-014 | EPIC-007 | Use the platform as a responsive web app | US-014 | 5 | web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
 <!-- sdlc:auto:end matrix -->
