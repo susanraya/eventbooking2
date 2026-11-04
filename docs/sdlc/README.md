@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic event booking qpp
 
-**Documentation version:** v3
+**Documentation version:** v4
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -27,11 +27,11 @@ basic event booking qpp
 | [API reference](development/api-reference.md) | 1 route |
 | [Test report](testing/test-report.md) | not run yet |
 | [Tests](testing/test-cases.md) | 0 tests |
-| [Deployment guide](deployment/deployment-guide.md) | not deployed yet |
-| [Runbook](deployment/runbook.md) | not deployed yet |
-| [Release notes](deployment/release-notes.md) | 0 releases |
+| [Deployment guide](deployment/deployment-guide.md) | deployed |
+| [Runbook](deployment/runbook.md) | deployed |
+| [Release notes](deployment/release-notes.md) | 1 release |
 | [Traceability matrix](traceability-matrix.md) | 14 requirements |
-| [Changelog](CHANGELOG.md) | 3 versions |
+| [Changelog](CHANGELOG.md) | 4 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -80,7 +80,12 @@ basic event booking qpp
 
 ### Deployment
 
-- No deployment recorded yet for eventbooking2.
+- No deployment date/timestamp provided.
+- No record of who approved or executed this deployment.
+- No release notes or changelog indicating which of US-001 through US-014 are included in version 88c1f0dd60a9, so traceability to requirements cannot be established.
+- No mention of pre-deployment test results or sign-off backing this release.
+- No rollback plan or prior-version reference recorded in case this deployment needs to be reverted.
+- Frontend and backend URLs use .local domains, which is unusual for a 'live' production deployment -- not flagged as an error, but worth human confirmation that this is the intended production environment.
 
 ### Maintenance
 
