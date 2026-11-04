@@ -7,7 +7,15 @@ Pushes to `main` run `.github/workflows/deploy.yml`, which builds the API image 
 <!-- sdlc:auto:end how-it-deploys -->
 
 <!-- sdlc:auto:start environments -->
-_No environments recorded._
+| Name | Service | Runtime | Scaling | Environment |
+|---|---|---|---|---|
+| Angular Web App | web_app | Static build on S3 + CloudFront (ap-south-1) | CDN edge | dev |
+| Spring Boot API | api_backend | ECS Fargate container, Java 21 (ap-south-1) | 1-2 tasks (dev) | dev |
+| Background Worker | worker | ECS Fargate container, Java 21 (ap-south-1) | 1 task (dev) | dev |
+| PostgreSQL | db | Amazon RDS for PostgreSQL 16, encrypted at rest (ap-south-1) | single instance + automated backups in India | dev |
+| Redis | cache/queue | ElastiCache for Redis 7 / redis:7-alpine (ap-south-1) | single node (dev) | dev |
+| Meilisearch | search | getmeili/meilisearch:v1.10.3 container on ECS (ap-south-1) | single node (dev) | dev |
+| Amazon S3 | object_store | S3 bucket, encrypted (ap-south-1) | managed | dev |
 <!-- sdlc:auto:end environments -->
 
 <!-- sdlc:auto:start live -->
@@ -15,5 +23,22 @@ _Not deployed yet._
 <!-- sdlc:auto:end live -->
 
 <!-- sdlc:auto:start topology -->
-_No deployment topology recorded._
+```mermaid
+graph LR
+  n_Angular_Web_App["Angular Web App<br/>web_app"]
+  n_Spring_Boot_API["Spring Boot API<br/>api_backend"]
+  n_Background_Worker["Background Worker<br/>worker"]
+  n_PostgreSQL["PostgreSQL<br/>db"]
+  n_Redis["Redis<br/>cache/queue"]
+  n_Meilisearch["Meilisearch<br/>search"]
+  n_Amazon_S3["Amazon S3<br/>object_store"]
+  n_Angular_Web_App -->|"HTTPS"| n_Spring_Boot_API
+  n_Spring_Boot_API -->|"TLS/5432"| n_PostgreSQL
+  n_Spring_Boot_API -->|"TLS/6379"| n_Redis
+  n_Spring_Boot_API -->|"HTTPS"| n_Meilisearch
+  n_Spring_Boot_API -->|"HTTPS"| n_Amazon_S3
+  n_Background_Worker -->|"TLS/6379"| n_Redis
+  n_Background_Worker -->|"TLS/5432"| n_PostgreSQL
+  n_Background_Worker -->|"HTTPS"| n_Amazon_S3
+```
 <!-- sdlc:auto:end topology -->

@@ -7,7 +7,22 @@ _No routes found._
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
-_Code matches the designed API._
+**Designed but missing:**
+
+- GET /events/search
+- GET /events/{id}
+- GET /me/tickets
+- GET /me/tickets/{id}
+- GET /organizer/events
+- POST /auth/login
+- POST /auth/logout
+- POST /auth/register
+- POST /consent/withdraw
+- POST /events
+- POST /events/{id}/ticket-types
+- POST /orders
+- POST /payments/webhook
+- PUT /events/{id}
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->

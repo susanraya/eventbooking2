@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic event booking qpp
 
-**Documentation version:** v1
+**Documentation version:** v2
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -14,14 +14,14 @@ basic event booking qpp
 | Document | State |
 |---|---|
 | [Requirements](requirements/README.md) | v1 approved |
-| [Architecture](architecture/README.md) | 1 entry |
+| [Architecture](architecture/README.md) | 22 entries |
 | [Development](development/README.md) | 1 entry |
 | [Testing](testing/README.md) | 1 entry |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 1 entry |
-| [Data model](architecture/data-model.md) | not generated yet |
-| [API (OpenAPI)](architecture/api/openapi.yaml) | not generated yet |
-| [Decisions (ADRs)](architecture/adr/README.md) | 0 decisions |
+| [Data model](architecture/data-model.md) | generated |
+| [API (OpenAPI)](architecture/api/openapi.yaml) | generated |
+| [Decisions (ADRs)](architecture/adr/README.md) | 4 decisions |
 | [Sprint plan](development/sprint-plan.md) | not generated yet |
 | [Developer guide](development/developer-guide.md) | not generated yet |
 | [API reference](development/api-reference.md) | 0 routes |
@@ -31,7 +31,7 @@ basic event booking qpp
 | [Runbook](deployment/runbook.md) | not deployed yet |
 | [Release notes](deployment/release-notes.md) | 0 releases |
 | [Traceability matrix](traceability-matrix.md) | 14 requirements |
-| [Changelog](CHANGELOG.md) | 1 version |
+| [Changelog](CHANGELOG.md) | 2 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -53,8 +53,9 @@ basic event booking qpp
 
 ### Architecture
 
-- Architecture phase has not started; the approved tech stack (Spring Boot 4.1, Angular 22, PostgreSQL 16, AWS Mumbai) and approved services (Razorpay, SendGrid, MSG91, Meilisearch, Redis, S3) from requirements have not been translated into a system design.
-- No App Design screens exist yet, which also blocks the user_guide section.
+- Architecture input does not map components or critical paths to specific requirement IDs (US-001..US-014); requirements-to-architecture traceability needs to be confirmed against the requirements phase input directly.
+- No approval date or approver name given for the v1 architecture sign-off.
+- No explicit requirement ID linked in the architecture input for this critical path.
 
 ### Development
 

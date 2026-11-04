@@ -2,6 +2,517 @@
 openapi: 3.1.0
 info:
   title: eventbooking2
-  version: architecture-v0
+  version: architecture-v1
   description: Designed API from the approved architecture (not extracted from code).
-paths: {}
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate credentials and return a JWT; failures give a generic
+        error
+      description: Authenticate credentials and return a JWT; failures give a generic
+        error
+      operationId: post_auth_login
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, password}'
+      responses:
+        '200':
+          description: 200 {token, role} or 401 generic
+  /auth/logout:
+    post:
+      summary: End the current session so protected pages require re-auth
+      description: End the current session so protected pages require re-auth
+      operationId: post_auth_logout
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{}'
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /auth/register:
+    post:
+      summary: Register an attendee or organizer with validated email/password, required
+        details and active DPDP consent; stores a cons
+      description: Register an attendee or organizer with validated email/password,
+        required details and active DPDP consent; stores a consent record and signs
+        the user in
+      operationId: post_auth_register
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{role, email, password, fullName, organization?, consent:{given,
+                noticeVersion, purposes}}'
+      responses:
+        '200':
+          description: 201 {userId, role, token}
+  /consent/withdraw:
+    post:
+      summary: Record a consent withdrawal with timestamp through a flow no harder
+        than granting
+      description: Record a consent withdrawal with timestamp through a flow no harder
+        than granting
+      operationId: post_consent_withdraw
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{purposes?}'
+      responses:
+        '200':
+          description: 200 {withdrawnAt}
+      security:
+      - bearerAuth: []
+  /events:
+    post:
+      summary: Organizer creates an event with validated required fields
+      description: Organizer creates an event with validated required fields
+      operationId: post_events
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{title, venue, city, category, description, startsAt,
+                posterUrl?}'
+      responses:
+        '200':
+          description: 201 {eventId}
+      security:
+      - bearerAuth: []
+  /events/search:
+    get:
+      summary: Browse/search events by city, date and category via Meilisearch with
+        typo tolerance and empty-state handling
+      description: Browse/search events by city, date and category via Meilisearch
+        with typo tolerance and empty-state handling
+      operationId: get_events_search
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{event summary}]
+  /events/{id}:
+    get:
+      summary: Public event detail with venue, date/time, description and ticket types
+        marked sold-out where exhausted
+      description: Public event detail with venue, date/time, description and ticket
+        types marked sold-out where exhausted
+      operationId: get_events_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 {event, ticketTypes[]}
+    put:
+      summary: Organizer updates their own event; changes reflect on the public listing
+      description: Organizer updates their own event; changes reflect on the public
+        listing
+      operationId: put_events_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{...event fields, status}'
+      responses:
+        '200':
+          description: 200 {event}
+      security:
+      - bearerAuth: []
+  /events/{id}/ticket-types:
+    post:
+      summary: Organizer defines a general-admission ticket type with name, INR price
+        and quantity
+      description: Organizer defines a general-admission ticket type with name, INR
+        price and quantity
+      operationId: post_events_id_ticket_types
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{name, priceInr, quantityTotal}'
+      responses:
+        '200':
+          description: 201 {ticketTypeId}
+      security:
+      - bearerAuth: []
+  /me/tickets:
+    get:
+      summary: Attendee's own tickets with event info, upcoming vs past, each with
+        its QR image
+      description: Attendee's own tickets with event info, upcoming vs past, each
+        with its QR image
+      operationId: get_me_tickets
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{ticket, event, qrImageUrl}]
+      security:
+      - bearerAuth: []
+  /me/tickets/{id}:
+    get:
+      summary: View a single owned ticket with its unique QR code and event details
+      description: View a single owned ticket with its unique QR code and event details
+      operationId: get_me_tickets_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 {ticket, qrImageUrl, event}
+      security:
+      - bearerAuth: []
+  /orders:
+    post:
+      summary: Create an order for selected ticket types/quantities within stock,
+        reserve stock and create a Razorpay order
+      description: Create an order for selected ticket types/quantities within stock,
+        reserve stock and create a Razorpay order
+      operationId: post_orders
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{eventId, items:[{ticketTypeId, quantity}]}'
+      responses:
+        '200':
+          description: 201 {orderId, razorpayOrderId, amount} or 409 remaining availability
+      security:
+      - bearerAuth: []
+  /organizer/events:
+    get:
+      summary: Organizer dashboard list of own events with status and tickets sold
+        vs available
+      description: Organizer dashboard list of own events with status and tickets
+        sold vs available
+      operationId: get_organizer_events
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{event, sold, total, status}]
+      security:
+      - bearerAuth: []
+  /payments/webhook:
+    post:
+      summary: 'Razorpay webhook: verify signature, confirm booking, decrement stock
+        and enqueue ticket issuance'
+      description: 'Razorpay webhook: verify signature, confirm booking, decrement
+        stock and enqueue ticket issuance'
+      operationId: post_payments_webhook
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Razorpay event payload + signature header
+      responses:
+        '200':
+          description: '200'
+      security:
+      - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    users:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        password_hash:
+          type: string
+        role:
+          type: string
+        full_name:
+          type: string
+        phone:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - email
+      - password_hash
+      - role
+      - full_name
+      - created_at
+    organizer_profiles:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        organization_name:
+          type: string
+        contact_details:
+          type: string
+      required:
+      - id
+      - user_id
+      - organization_name
+    consent_records:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        purposes:
+          type: string
+        notice_version:
+          type: string
+        consent_given:
+          type: boolean
+        granted_at:
+          type: string
+          format: date-time
+        withdrawn_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - user_id
+      - purposes
+      - notice_version
+      - consent_given
+      - granted_at
+    events:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organizer_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        venue:
+          type: string
+        city:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        poster_url:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organizer_id
+      - title
+      - venue
+      - city
+      - category
+      - description
+      - starts_at
+      - status
+      - created_at
+    ticket_types:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price_inr:
+          type: number
+        quantity_total:
+          type: integer
+        quantity_sold:
+          type: integer
+      required:
+      - id
+      - event_id
+      - name
+      - price_inr
+      - quantity_total
+      - quantity_sold
+    orders:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        attendee_id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        total_amount_inr:
+          type: number
+        razorpay_order_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - attendee_id
+      - event_id
+      - status
+      - total_amount_inr
+      - created_at
+    order_items:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          format: uuid
+        ticket_type_id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+        unit_price_inr:
+          type: number
+      required:
+      - id
+      - order_id
+      - ticket_type_id
+      - quantity
+      - unit_price_inr
+    tickets:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          format: uuid
+        ticket_type_id:
+          type: string
+          format: uuid
+        qr_code_id:
+          type: string
+          format: uuid
+        qr_image_url:
+          type: string
+        status:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - order_id
+      - ticket_type_id
+      - qr_code_id
+      - status
+    payments:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          format: uuid
+        razorpay_payment_id:
+          type: string
+        amount_inr:
+          type: number
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - order_id
+      - amount_inr
+      - status
+      - created_at
+    audit_logs:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        actor_user_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+        entity:
+          type: string
+        entity_id:
+          type: string
+        ip_address:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - action
+      - entity
+      - created_at
