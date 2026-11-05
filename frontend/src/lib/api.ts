@@ -11,8 +11,7 @@
 // The generated screens do NOT use this yet -- they render seeded sample data, exactly as
 // they were approved. This is the seam to replace that with real calls, one screen at a
 // time.
-export const API_BASE_URL: string =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+export const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 // The shared bearer the deployed API expects (its SECRET_KEY). The platform bakes the
 // same value into both sides at deploy time, so authenticated calls work out of the box.
@@ -50,6 +49,22 @@ export function clearSessionToken(): void {
   }
 }
 
+// Thrown by apiFetch on a non-2xx response. Carries the HTTP status and the parsed JSON
+// body (when the server sent one) so a caller can branch on a 409 (conflict, e.g. email
+// already in use) or a 400 (field-level validation errors) rather than only seeing a
+// generic failure.
+export class ApiError extends Error {
+  readonly status: number;
+  readonly body: unknown;
+
+  constructor(message: string, status: number, body: unknown) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.body = body;
+  }
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const bearer = getSessionToken() ?? API_SECRET_KEY;
   // Join with exactly one slash: API_BASE_URL is baked with a trailing slash (the API
@@ -64,7 +79,17 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     },
   });
   if (!response.ok) {
-    throw new Error(`${init?.method ?? "GET"} ${path} failed: ${response.status}`);
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      body = undefined;
+    }
+    throw new ApiError(
+      `${init?.method ?? "GET"} ${path} failed: ${response.status}`,
+      response.status,
+      body,
+    );
   }
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }
