@@ -8,7 +8,9 @@ function unique(label: string): string {
   return `${label}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
-async function registerAttendee(request: APIRequestContext): Promise<{ token: string; email: string }> {
+async function registerAttendee(
+  request: APIRequestContext,
+): Promise<{ token: string; email: string }> {
   const email = `${unique("consent-attendee")}@example.com`;
   const response = await request.post(`${API_BASE}/auth/register`, {
     data: {
@@ -94,7 +96,11 @@ test.describe("consent withdrawal from account settings (US-005-2)", () => {
     await signInAs(page, token);
 
     await page.route("**/consent/withdraw", (route) =>
-      route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "boom" }) }),
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "boom" }),
+      }),
     );
 
     await page.goto("/account-settings");
