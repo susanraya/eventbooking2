@@ -55,9 +55,9 @@ describe("App", () => {
     await router.navigateByUrl("/events");
     await fixture.whenStable();
 
-    const signOutButton = Array.from(
-      fixture.nativeElement.querySelectorAll("button"),
-    ).find((b: HTMLButtonElement) => b.textContent?.trim() === "Sign out") as HTMLButtonElement;
+    const signOutButton = Array.from(fixture.nativeElement.querySelectorAll("button")).find(
+      (b: HTMLButtonElement) => b.textContent?.trim() === "Sign out",
+    ) as HTMLButtonElement;
     signOutButton.click();
     await fixture.whenStable();
 
