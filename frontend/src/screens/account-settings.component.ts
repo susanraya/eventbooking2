@@ -1,5 +1,5 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
- 
+
 import { Component, signal, computed, effect } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
