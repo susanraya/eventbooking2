@@ -1,11 +1,32 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
 
 import { Component, signal, computed, effect } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 
 import { apiFetch } from "@/lib/api";
 import { ScreenBase } from "@/lib/screen-base";
 import { UI_KIT } from "@/lib/ui";
+
+// Formats an ISO-8601 timestamp (as returned by the server) into "5 Nov 2026, 16:40 IST".
+function formatIst(iso) {
+  if (!iso) {
+    return "";
+  }
+  const d = new Date(iso);
+  const datePart = d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Kolkata",
+  });
+  const timePart = d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Kolkata",
+  });
+  return datePart + ", " + timePart + " IST";
+}
+
 const template = `
 <div class="min-h-screen w-full px-4 py-10 sm:px-6 sm:py-14"
      [style.background-color]="brand.backgroundColor"
@@ -164,7 +185,7 @@ const template = `
               <div class="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between">
                 <dt class="text-[10px] uppercase tracking-[0.28em]" [style.color]="brand.neutralColor">Withdrawn at</dt>
                 <dd class="tabular-nums" [style.color]="withdrawn() ? brand.primaryColor : brand.neutralColor">
-                  {{ withdrawn() ? consent().withdrawn_at : 'Not withdrawn' }}
+                  {{ withdrawn() ? withdrawnAtLabel() : 'Not withdrawn' }}
                 </dd>
               </div>
             </dl>
@@ -220,9 +241,9 @@ const template = `
                [style.border]="'1px solid ' + brand.accentColor"
                [style.outline-color]="brand.primaryColor">
             <ui-icon name="CheckCircle" class="mx-auto h-6 w-6" aria-hidden="true"></ui-icon>
-            <p class="mt-3 text-[15px] tabular-nums">Consent withdrawal recorded on 5 Nov 2026, 16:40 IST.</p>
+            <p class="mt-3 text-[15px] tabular-nums">Consent withdrawal recorded on {{ withdrawnAtLabel() }}.</p>
             <p class="mt-2 text-xs tabular-nums" [style.color]="brand.neutralColor">
-              Receipt CR&#8209;2026&#8209;0118 &middot; Notice version 1.2 &middot; Logged against your account in the audit trail.
+              Notice version {{ consent().notice_version }} &middot; Logged against your account in the audit trail.
             </p>
             <p class="mx-auto mt-4 max-w-[58ch] text-xs leading-relaxed" [style.color]="brand.neutralColor">
               Tickets already issued remain valid for entry. We will keep only what the law requires us to keep.
@@ -333,7 +354,7 @@ const template = `
 
 @Component({
   selector: "app-account-settings-screen",
-  imports: [...UI_KIT, FormsModule],
+  imports: [...UI_KIT],
   template,
 })
 export default class Screen extends ScreenBase {
@@ -363,6 +384,7 @@ export default class Screen extends ScreenBase {
 
   withdrawn = computed(() => this.consent().withdrawn_at !== null);
   purposeLine = computed(() => this.consent().purposes.join(", ").toLowerCase());
+  withdrawnAtLabel = computed(() => formatIst(this.consent().withdrawn_at));
 
   focusConfirm = effect(() => {
     if (this.dialogShown()) {

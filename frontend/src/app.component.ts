@@ -119,7 +119,7 @@ export const routes: Routes = [
     component: AppShellComponent,
     children: [
       { path: "events", component: EventsScreen },
-      { path: "event-detail", component: EventDetailScreen },
+      { path: "event-detail/:id", component: EventDetailScreen },
       { path: "my-tickets", component: MyTicketsScreen, canActivate: [requireSession] },
       {
         path: "organizer-dashboard",

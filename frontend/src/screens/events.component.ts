@@ -1,5 +1,5 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Component, signal, computed } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
@@ -163,7 +163,6 @@ const template = `
 
                     <h3 class="text-base leading-snug" [style.font-family]="brand.fontHeading">
                       <button type="button"
-                              [attr.data-wf]="wf(e)"
                               (click)="openEvent(e)"
                               [attr.aria-label]="'View ' + e.title + ', ' + e.starts_label + ' at ' + e.venue"
                               class="text-left uppercase after:absolute after:inset-0 after:content-[&quot;&quot;] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
@@ -246,57 +245,362 @@ const template = `
   template,
 })
 export default class Screen extends ScreenBase {
-  cities = ['Bengaluru', 'Chennai', 'Delhi NCR', 'Goa', 'Hyderabad', 'Mumbai', 'Pune'];
-  categories = ['Comedy', 'Food & Drink', 'Music', 'Sports', 'Technology', 'Theatre'];
+  cities = ["Bengaluru", "Chennai", "Delhi NCR", "Goa", "Hyderabad", "Mumbai", "Pune"];
+  categories = ["Comedy", "Food & Drink", "Music", "Sports", "Technology", "Theatre"];
   dateOptions = [
-    { value: 'any', label: 'Any date' },
-    { value: 'weekend', label: 'This weekend · 12–13 Dec' },
-    { value: 'dec', label: '1–31 Dec 2026' },
-    { value: 'jan', label: '1–31 Jan 2027' }
+    { value: "any", label: "Any date" },
+    { value: "weekend", label: "This weekend · 12–13 Dec" },
+    { value: "dec", label: "1–31 Dec 2026" },
+    { value: "jan", label: "1–31 Jan 2027" },
   ];
   skeletons = [1, 2, 3, 4, 5, 6];
 
-  wfByEventId = {
-    'e-4821': 'i-4-0-0',
-    'e-4833': 'i-4-0-1',
-    'e-4807': 'i-4-0-2',
-    'e-4866': 'i-4-0-3'
-  };
-
   allEvents = [
-    { id: 'e-4821', monogram: 'SA', title: 'Sunburn Arena ft. DJ Nucleya', venue: 'Phoenix Marketcity', city: 'Bengaluru', category: 'Music', starts_at: '2026-12-12T19:00', starts_label: 'Sat 12 Dec 2026, 7:00 PM', from_price_inr: 999, quantity_total: 2400, quantity_sold: 2287 },
-    { id: 'e-4833', monogram: 'BC', title: 'Bengaluru Comedy Nights', venue: 'Ranga Shankara, JP Nagar', city: 'Bengaluru', category: 'Comedy', starts_at: '2026-12-18T20:30', starts_label: 'Fri 18 Dec 2026, 8:30 PM', from_price_inr: 499, quantity_total: 320, quantity_sold: 148 },
-    { id: 'e-4807', monogram: 'IW', title: 'Indie Weekender 2026', venue: 'Jayamahal Palace Grounds', city: 'Bengaluru', category: 'Music', starts_at: '2026-12-20T17:00', starts_label: 'Sun 20 Dec 2026, 5:00 PM', from_price_inr: 1200, quantity_total: 5000, quantity_sold: 3110 },
-    { id: 'e-4866', monogram: 'ST', title: 'Startup Tech Summit', venue: 'KTPO Whitefield', city: 'Bengaluru', category: 'Technology', starts_at: '2026-12-23T10:00', starts_label: 'Wed 23 Dec 2026, 10:00 AM', from_price_inr: 2000, quantity_total: 900, quantity_sold: 612 },
-    { id: 'e-4790', monogram: 'RD', title: 'Raghu Dixit Project Live', venue: 'Manpho Convention Centre', city: 'Bengaluru', category: 'Music', starts_at: '2026-12-05T20:00', starts_label: 'Sat 5 Dec 2026, 8:00 PM', from_price_inr: 1499, quantity_total: 1200, quantity_sold: 1200 },
-    { id: 'e-4795', monogram: 'CM', title: 'Carnatic Mornings: Sanjay Subrahmanyan', venue: 'Chowdiah Memorial Hall', city: 'Bengaluru', category: 'Music', starts_at: '2026-12-06T09:00', starts_label: 'Sun 6 Dec 2026, 9:00 AM', from_price_inr: 750, quantity_total: 640, quantity_sold: 529 },
-    { id: 'e-4801', monogram: 'OM', title: 'Bangalore Open Mic Vol. 42', venue: 'Atta Galatta, Indiranagar', city: 'Bengaluru', category: 'Comedy', starts_at: '2026-12-08T19:30', starts_label: 'Tue 8 Dec 2026, 7:30 PM', from_price_inr: 250, quantity_total: 120, quantity_sold: 41 },
-    { id: 'e-4812', monogram: 'IF', title: 'The Improv Factory', venue: 'That Comedy Club, Koramangala', city: 'Bengaluru', category: 'Comedy', starts_at: '2026-12-10T21:00', starts_label: 'Thu 10 Dec 2026, 9:00 PM', from_price_inr: 399, quantity_total: 90, quantity_sold: 68 },
-    { id: 'e-4840', monogram: 'AM', title: 'Angular India Meetup', venue: 'Prestige Tech Park, Marathahalli', city: 'Bengaluru', category: 'Technology', starts_at: '2026-12-11T18:30', starts_label: 'Fri 11 Dec 2026, 6:30 PM', from_price_inr: 300, quantity_total: 250, quantity_sold: 196 },
-    { id: 'e-4823', monogram: 'KF', title: 'Koramangala Food Walk', venue: 'Jyoti Nivas Circle', city: 'Bengaluru', category: 'Food & Drink', starts_at: '2026-12-13T11:00', starts_label: 'Sun 13 Dec 2026, 11:00 AM', from_price_inr: 1100, quantity_total: 60, quantity_sold: 60 },
-    { id: 'e-4818', monogram: 'MV', title: 'Madhyama Vyayoga: Theatre Week', venue: 'Ranga Shankara, JP Nagar', city: 'Bengaluru', category: 'Theatre', starts_at: '2026-12-14T19:30', starts_label: 'Mon 14 Dec 2026, 7:30 PM', from_price_inr: 350, quantity_total: 280, quantity_sold: 95 },
-    { id: 'e-4836', monogram: 'JH', title: 'Jazz at The Humming Tree', venue: 'The Humming Tree, Indiranagar', city: 'Bengaluru', category: 'Music', starts_at: '2026-12-16T21:00', starts_label: 'Wed 16 Dec 2026, 9:00 PM', from_price_inr: 850, quantity_total: 180, quantity_sold: 180 },
-    { id: 'e-4845', monogram: 'AB', title: 'AI Builders Conclave', venue: 'Taj Yeshwantpur', city: 'Bengaluru', category: 'Technology', starts_at: '2026-12-17T09:30', starts_label: 'Thu 17 Dec 2026, 9:30 AM', from_price_inr: 3500, quantity_total: 400, quantity_sold: 352 },
-    { id: 'e-4855', monogram: 'BF', title: 'Bengaluru FC vs Mumbai City FC', venue: 'Sree Kanteerava Stadium', city: 'Bengaluru', category: 'Sports', starts_at: '2026-12-19T19:30', starts_label: 'Sat 19 Dec 2026, 7:30 PM', from_price_inr: 400, quantity_total: 18000, quantity_sold: 17460 },
-    { id: 'e-4868', monogram: 'NB', title: 'Namma Brew Fest 2026', venue: 'Embassy Golflinks', city: 'Bengaluru', category: 'Food & Drink', starts_at: '2026-12-20T12:00', starts_label: 'Sun 20 Dec 2026, 12:00 PM', from_price_inr: 1600, quantity_total: 2500, quantity_sold: 1884 },
-    { id: 'e-4860', monogram: 'SC', title: 'Bollywood Night with Sunidhi Chauhan', venue: 'Palace Grounds, Gate 7', city: 'Bengaluru', category: 'Music', starts_at: '2026-12-25T20:00', starts_label: 'Fri 25 Dec 2026, 8:00 PM', from_price_inr: 1800, quantity_total: 7000, quantity_sold: 4290 },
-    { id: 'e-4871', monogram: 'WC', title: 'Whitefield Wine & Cheese Evening', venue: 'The Den, Whitefield', city: 'Bengaluru', category: 'Food & Drink', starts_at: '2026-12-26T18:00', starts_label: 'Sat 26 Dec 2026, 6:00 PM', from_price_inr: 2400, quantity_total: 150, quantity_sold: 38 },
-    { id: 'e-4877', monogram: 'SB', title: 'Shakespeare Under the Banyan', venue: 'Cubbon Park Bandstand', city: 'Bengaluru', category: 'Theatre', starts_at: '2026-12-27T18:30', starts_label: 'Sun 27 Dec 2026, 6:30 PM', from_price_inr: 600, quantity_total: 200, quantity_sold: 44 },
+    {
+      id: "e-4821",
+      monogram: "SA",
+      title: "Sunburn Arena ft. DJ Nucleya",
+      venue: "Phoenix Marketcity",
+      city: "Bengaluru",
+      category: "Music",
+      starts_at: "2026-12-12T19:00",
+      starts_label: "Sat 12 Dec 2026, 7:00 PM",
+      from_price_inr: 999,
+      quantity_total: 2400,
+      quantity_sold: 2287,
+    },
+    {
+      id: "e-4833",
+      monogram: "BC",
+      title: "Bengaluru Comedy Nights",
+      venue: "Ranga Shankara, JP Nagar",
+      city: "Bengaluru",
+      category: "Comedy",
+      starts_at: "2026-12-18T20:30",
+      starts_label: "Fri 18 Dec 2026, 8:30 PM",
+      from_price_inr: 499,
+      quantity_total: 320,
+      quantity_sold: 148,
+    },
+    {
+      id: "e-4807",
+      monogram: "IW",
+      title: "Indie Weekender 2026",
+      venue: "Jayamahal Palace Grounds",
+      city: "Bengaluru",
+      category: "Music",
+      starts_at: "2026-12-20T17:00",
+      starts_label: "Sun 20 Dec 2026, 5:00 PM",
+      from_price_inr: 1200,
+      quantity_total: 5000,
+      quantity_sold: 3110,
+    },
+    {
+      id: "e-4866",
+      monogram: "ST",
+      title: "Startup Tech Summit",
+      venue: "KTPO Whitefield",
+      city: "Bengaluru",
+      category: "Technology",
+      starts_at: "2026-12-23T10:00",
+      starts_label: "Wed 23 Dec 2026, 10:00 AM",
+      from_price_inr: 2000,
+      quantity_total: 900,
+      quantity_sold: 612,
+    },
+    {
+      id: "e-4790",
+      monogram: "RD",
+      title: "Raghu Dixit Project Live",
+      venue: "Manpho Convention Centre",
+      city: "Bengaluru",
+      category: "Music",
+      starts_at: "2026-12-05T20:00",
+      starts_label: "Sat 5 Dec 2026, 8:00 PM",
+      from_price_inr: 1499,
+      quantity_total: 1200,
+      quantity_sold: 1200,
+    },
+    {
+      id: "e-4795",
+      monogram: "CM",
+      title: "Carnatic Mornings: Sanjay Subrahmanyan",
+      venue: "Chowdiah Memorial Hall",
+      city: "Bengaluru",
+      category: "Music",
+      starts_at: "2026-12-06T09:00",
+      starts_label: "Sun 6 Dec 2026, 9:00 AM",
+      from_price_inr: 750,
+      quantity_total: 640,
+      quantity_sold: 529,
+    },
+    {
+      id: "e-4801",
+      monogram: "OM",
+      title: "Bangalore Open Mic Vol. 42",
+      venue: "Atta Galatta, Indiranagar",
+      city: "Bengaluru",
+      category: "Comedy",
+      starts_at: "2026-12-08T19:30",
+      starts_label: "Tue 8 Dec 2026, 7:30 PM",
+      from_price_inr: 250,
+      quantity_total: 120,
+      quantity_sold: 41,
+    },
+    {
+      id: "e-4812",
+      monogram: "IF",
+      title: "The Improv Factory",
+      venue: "That Comedy Club, Koramangala",
+      city: "Bengaluru",
+      category: "Comedy",
+      starts_at: "2026-12-10T21:00",
+      starts_label: "Thu 10 Dec 2026, 9:00 PM",
+      from_price_inr: 399,
+      quantity_total: 90,
+      quantity_sold: 68,
+    },
+    {
+      id: "e-4840",
+      monogram: "AM",
+      title: "Angular India Meetup",
+      venue: "Prestige Tech Park, Marathahalli",
+      city: "Bengaluru",
+      category: "Technology",
+      starts_at: "2026-12-11T18:30",
+      starts_label: "Fri 11 Dec 2026, 6:30 PM",
+      from_price_inr: 300,
+      quantity_total: 250,
+      quantity_sold: 196,
+    },
+    {
+      id: "e-4823",
+      monogram: "KF",
+      title: "Koramangala Food Walk",
+      venue: "Jyoti Nivas Circle",
+      city: "Bengaluru",
+      category: "Food & Drink",
+      starts_at: "2026-12-13T11:00",
+      starts_label: "Sun 13 Dec 2026, 11:00 AM",
+      from_price_inr: 1100,
+      quantity_total: 60,
+      quantity_sold: 60,
+    },
+    {
+      id: "e-4818",
+      monogram: "MV",
+      title: "Madhyama Vyayoga: Theatre Week",
+      venue: "Ranga Shankara, JP Nagar",
+      city: "Bengaluru",
+      category: "Theatre",
+      starts_at: "2026-12-14T19:30",
+      starts_label: "Mon 14 Dec 2026, 7:30 PM",
+      from_price_inr: 350,
+      quantity_total: 280,
+      quantity_sold: 95,
+    },
+    {
+      id: "e-4836",
+      monogram: "JH",
+      title: "Jazz at The Humming Tree",
+      venue: "The Humming Tree, Indiranagar",
+      city: "Bengaluru",
+      category: "Music",
+      starts_at: "2026-12-16T21:00",
+      starts_label: "Wed 16 Dec 2026, 9:00 PM",
+      from_price_inr: 850,
+      quantity_total: 180,
+      quantity_sold: 180,
+    },
+    {
+      id: "e-4845",
+      monogram: "AB",
+      title: "AI Builders Conclave",
+      venue: "Taj Yeshwantpur",
+      city: "Bengaluru",
+      category: "Technology",
+      starts_at: "2026-12-17T09:30",
+      starts_label: "Thu 17 Dec 2026, 9:30 AM",
+      from_price_inr: 3500,
+      quantity_total: 400,
+      quantity_sold: 352,
+    },
+    {
+      id: "e-4855",
+      monogram: "BF",
+      title: "Bengaluru FC vs Mumbai City FC",
+      venue: "Sree Kanteerava Stadium",
+      city: "Bengaluru",
+      category: "Sports",
+      starts_at: "2026-12-19T19:30",
+      starts_label: "Sat 19 Dec 2026, 7:30 PM",
+      from_price_inr: 400,
+      quantity_total: 18000,
+      quantity_sold: 17460,
+    },
+    {
+      id: "e-4868",
+      monogram: "NB",
+      title: "Namma Brew Fest 2026",
+      venue: "Embassy Golflinks",
+      city: "Bengaluru",
+      category: "Food & Drink",
+      starts_at: "2026-12-20T12:00",
+      starts_label: "Sun 20 Dec 2026, 12:00 PM",
+      from_price_inr: 1600,
+      quantity_total: 2500,
+      quantity_sold: 1884,
+    },
+    {
+      id: "e-4860",
+      monogram: "SC",
+      title: "Bollywood Night with Sunidhi Chauhan",
+      venue: "Palace Grounds, Gate 7",
+      city: "Bengaluru",
+      category: "Music",
+      starts_at: "2026-12-25T20:00",
+      starts_label: "Fri 25 Dec 2026, 8:00 PM",
+      from_price_inr: 1800,
+      quantity_total: 7000,
+      quantity_sold: 4290,
+    },
+    {
+      id: "e-4871",
+      monogram: "WC",
+      title: "Whitefield Wine & Cheese Evening",
+      venue: "The Den, Whitefield",
+      city: "Bengaluru",
+      category: "Food & Drink",
+      starts_at: "2026-12-26T18:00",
+      starts_label: "Sat 26 Dec 2026, 6:00 PM",
+      from_price_inr: 2400,
+      quantity_total: 150,
+      quantity_sold: 38,
+    },
+    {
+      id: "e-4877",
+      monogram: "SB",
+      title: "Shakespeare Under the Banyan",
+      venue: "Cubbon Park Bandstand",
+      city: "Bengaluru",
+      category: "Theatre",
+      starts_at: "2026-12-27T18:30",
+      starts_label: "Sun 27 Dec 2026, 6:30 PM",
+      from_price_inr: 600,
+      quantity_total: 200,
+      quantity_sold: 44,
+    },
 
-    { id: 'e-5102', monogram: 'ZK', title: 'Zakir Khan: Papa Yaar', venue: 'NSCI Dome, Worli', city: 'Mumbai', category: 'Comedy', starts_at: '2026-12-12T20:00', starts_label: 'Sat 12 Dec 2026, 8:00 PM', from_price_inr: 1299, quantity_total: 4000, quantity_sold: 3880 },
-    { id: 'e-5110', monogram: 'SO', title: 'Symphony Orchestra of India: Beethoven 9', venue: 'NCPA Jamshed Bhabha', city: 'Mumbai', category: 'Music', starts_at: '2026-12-13T18:00', starts_label: 'Sun 13 Dec 2026, 6:00 PM', from_price_inr: 2500, quantity_total: 1000, quantity_sold: 640 },
-    { id: 'e-5288', monogram: 'DW', title: 'India Design Week Talks', venue: 'Bikaner House', city: 'Delhi NCR', category: 'Technology', starts_at: '2026-12-10T10:00', starts_label: 'Thu 10 Dec 2026, 10:00 AM', from_price_inr: 1500, quantity_total: 500, quantity_sold: 500 },
-    { id: 'e-5301', monogram: 'PK', title: 'Prateek Kuhad: Silhouettes Tour', venue: 'Jawaharlal Nehru Stadium', city: 'Delhi NCR', category: 'Music', starts_at: '2027-01-15T20:00', starts_label: 'Fri 15 Jan 2027, 8:00 PM', from_price_inr: 1999, quantity_total: 12000, quantity_sold: 4320 },
-    { id: 'e-5407', monogram: 'DT', title: 'Deccan Tech Fest 2027', venue: 'HITEX Exhibition Centre', city: 'Hyderabad', category: 'Technology', starts_at: '2027-01-16T09:00', starts_label: 'Sat 16 Jan 2027, 9:00 AM', from_price_inr: 2200, quantity_total: 3000, quantity_sold: 1180 },
-    { id: 'e-5520', monogram: 'BJ', title: 'Margazhi Season: Bombay Jayashri', venue: 'The Music Academy', city: 'Chennai', category: 'Music', starts_at: '2026-12-19T18:30', starts_label: 'Sat 19 Dec 2026, 6:30 PM', from_price_inr: 900, quantity_total: 1400, quantity_sold: 1400 },
-    { id: 'e-5614', monogram: 'PS', title: 'Pune Stand-Up Festival', venue: 'Balgandharva Rangmandir', city: 'Pune', category: 'Comedy', starts_at: '2026-12-27T19:00', starts_label: 'Sun 27 Dec 2026, 7:00 PM', from_price_inr: 599, quantity_total: 900, quantity_sold: 710 },
-    { id: 'e-5700', monogram: 'SG', title: 'Sunburn Festival Goa 2026', venue: 'Vagator Beach', city: 'Goa', category: 'Music', starts_at: '2026-12-31T16:00', starts_label: 'Thu 31 Dec 2026, 4:00 PM', from_price_inr: 4999, quantity_total: 25000, quantity_sold: 24100 }
+    {
+      id: "e-5102",
+      monogram: "ZK",
+      title: "Zakir Khan: Papa Yaar",
+      venue: "NSCI Dome, Worli",
+      city: "Mumbai",
+      category: "Comedy",
+      starts_at: "2026-12-12T20:00",
+      starts_label: "Sat 12 Dec 2026, 8:00 PM",
+      from_price_inr: 1299,
+      quantity_total: 4000,
+      quantity_sold: 3880,
+    },
+    {
+      id: "e-5110",
+      monogram: "SO",
+      title: "Symphony Orchestra of India: Beethoven 9",
+      venue: "NCPA Jamshed Bhabha",
+      city: "Mumbai",
+      category: "Music",
+      starts_at: "2026-12-13T18:00",
+      starts_label: "Sun 13 Dec 2026, 6:00 PM",
+      from_price_inr: 2500,
+      quantity_total: 1000,
+      quantity_sold: 640,
+    },
+    {
+      id: "e-5288",
+      monogram: "DW",
+      title: "India Design Week Talks",
+      venue: "Bikaner House",
+      city: "Delhi NCR",
+      category: "Technology",
+      starts_at: "2026-12-10T10:00",
+      starts_label: "Thu 10 Dec 2026, 10:00 AM",
+      from_price_inr: 1500,
+      quantity_total: 500,
+      quantity_sold: 500,
+    },
+    {
+      id: "e-5301",
+      monogram: "PK",
+      title: "Prateek Kuhad: Silhouettes Tour",
+      venue: "Jawaharlal Nehru Stadium",
+      city: "Delhi NCR",
+      category: "Music",
+      starts_at: "2027-01-15T20:00",
+      starts_label: "Fri 15 Jan 2027, 8:00 PM",
+      from_price_inr: 1999,
+      quantity_total: 12000,
+      quantity_sold: 4320,
+    },
+    {
+      id: "e-5407",
+      monogram: "DT",
+      title: "Deccan Tech Fest 2027",
+      venue: "HITEX Exhibition Centre",
+      city: "Hyderabad",
+      category: "Technology",
+      starts_at: "2027-01-16T09:00",
+      starts_label: "Sat 16 Jan 2027, 9:00 AM",
+      from_price_inr: 2200,
+      quantity_total: 3000,
+      quantity_sold: 1180,
+    },
+    {
+      id: "e-5520",
+      monogram: "BJ",
+      title: "Margazhi Season: Bombay Jayashri",
+      venue: "The Music Academy",
+      city: "Chennai",
+      category: "Music",
+      starts_at: "2026-12-19T18:30",
+      starts_label: "Sat 19 Dec 2026, 6:30 PM",
+      from_price_inr: 900,
+      quantity_total: 1400,
+      quantity_sold: 1400,
+    },
+    {
+      id: "e-5614",
+      monogram: "PS",
+      title: "Pune Stand-Up Festival",
+      venue: "Balgandharva Rangmandir",
+      city: "Pune",
+      category: "Comedy",
+      starts_at: "2026-12-27T19:00",
+      starts_label: "Sun 27 Dec 2026, 7:00 PM",
+      from_price_inr: 599,
+      quantity_total: 900,
+      quantity_sold: 710,
+    },
+    {
+      id: "e-5700",
+      monogram: "SG",
+      title: "Sunburn Festival Goa 2026",
+      venue: "Vagator Beach",
+      city: "Goa",
+      category: "Music",
+      starts_at: "2026-12-31T16:00",
+      starts_label: "Thu 31 Dec 2026, 4:00 PM",
+      from_price_inr: 4999,
+      quantity_total: 25000,
+      quantity_sold: 24100,
+    },
   ];
 
-  query = signal('');
-  city = signal('Bengaluru');
-  dateRange = signal('dec');
-  category = signal('all');
+  query = signal("");
+  city = signal("Bengaluru");
+  dateRange = signal("dec");
+  category = signal("all");
 
   loading = signal(false);
   loadError = signal(false);
@@ -311,43 +615,53 @@ export default class Screen extends ScreenBase {
     const range = this.dateRange();
     const cat = this.category();
     return this.allEvents.filter((e) => {
-      if (city !== 'all' && e.city !== city) return false;
-      if (cat !== 'all' && e.category !== cat) return false;
-      if (range === 'dec' && !(e.starts_at >= '2026-12-01' && e.starts_at <= '2026-12-31T23:59')) return false;
-      if (range === 'jan' && !(e.starts_at >= '2027-01-01' && e.starts_at <= '2027-01-31T23:59')) return false;
-      if (range === 'weekend' && !(e.starts_at.indexOf('2026-12-12') === 0 || e.starts_at.indexOf('2026-12-13') === 0)) return false;
+      if (city !== "all" && e.city !== city) return false;
+      if (cat !== "all" && e.category !== cat) return false;
+      if (range === "dec" && !(e.starts_at >= "2026-12-01" && e.starts_at <= "2026-12-31T23:59"))
+        return false;
+      if (range === "jan" && !(e.starts_at >= "2027-01-01" && e.starts_at <= "2027-01-31T23:59"))
+        return false;
+      if (
+        range === "weekend" &&
+        !(e.starts_at.indexOf("2026-12-12") === 0 || e.starts_at.indexOf("2026-12-13") === 0)
+      )
+        return false;
       if (q) {
-        const hay = (e.title + ' ' + e.venue + ' ' + e.city + ' ' + e.category).toLowerCase();
+        const hay = (e.title + " " + e.venue + " " + e.city + " " + e.category).toLowerCase();
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
     });
   });
 
-  hasFilters = computed(() =>
-    this.query().trim() !== '' || this.city() !== 'all' || this.dateRange() !== 'any' || this.category() !== 'all'
+  hasFilters = computed(
+    () =>
+      this.query().trim() !== "" ||
+      this.city() !== "all" ||
+      this.dateRange() !== "any" ||
+      this.category() !== "all",
   );
 
   resultsPhrase = computed(() => {
     const n = this.filtered().length;
     const c = this.city();
-    if (n === 0) return c === 'all' ? 'No events found' : 'No events found in ' + c;
-    const noun = n === 1 ? 'event' : 'events';
-    return n + ' ' + noun + ' found' + (c === 'all' ? ' across India' : ' in ' + c);
+    if (n === 0) return c === "all" ? "No events found" : "No events found in " + c;
+    const noun = n === 1 ? "event" : "events";
+    return n + " " + noun + " found" + (c === "all" ? " across India" : " in " + c);
   });
 
   filterSummary = computed(() => {
     const parts = [];
     const d = this.dateOptions.find((o) => o.value === this.dateRange());
-    parts.push(d ? d.label : 'Any date');
-    parts.push(this.category() === 'all' ? 'All categories' : this.category());
+    parts.push(d ? d.label : "Any date");
+    parts.push(this.category() === "all" ? "All categories" : this.category());
     const q = this.query().trim();
-    if (q) parts.push('“' + q + '”');
-    return parts.join(' · ');
+    if (q) parts.push("“" + q + "”");
+    return parts.join(" · ");
   });
 
   setQuery(value) {
-    this.query.set(value || '');
+    this.query.set(value || "");
   }
 
   setCity(value) {
@@ -366,10 +680,10 @@ export default class Screen extends ScreenBase {
   }
 
   clearFilters() {
-    this.query.set('');
-    this.city.set('all');
-    this.dateRange.set('any');
-    this.category.set('all');
+    this.query.set("");
+    this.city.set("all");
+    this.dateRange.set("any");
+    this.category.set("all");
     this.refresh();
   }
 
@@ -391,7 +705,7 @@ export default class Screen extends ScreenBase {
   }
 
   delayFor(i) {
-    return (i < 9 ? i * 45 : 405) + 'ms';
+    return (i < 9 ? i * 45 : 405) + "ms";
   }
 
   remaining(e) {
@@ -408,27 +722,23 @@ export default class Screen extends ScreenBase {
   }
 
   statusLabel(e) {
-    if (this.isSoldOut(e)) return 'Sold out';
-    if (this.isScarce(e)) return 'Only ' + this.remaining(e) + ' left';
-    return 'On sale';
+    if (this.isSoldOut(e)) return "Sold out";
+    if (this.isScarce(e)) return "Only " + this.remaining(e) + " left";
+    return "On sale";
   }
 
   statusIcon(e) {
-    if (this.isSoldOut(e)) return 'X';
-    if (this.isScarce(e)) return 'AlertCircle';
-    return 'CheckCircle';
+    if (this.isSoldOut(e)) return "X";
+    if (this.isScarce(e)) return "AlertCircle";
+    return "CheckCircle";
   }
 
   money(n) {
-    return '₹' + Number(n).toLocaleString('en-IN');
-  }
-
-  wf(e) {
-    return this.wfByEventId[e.id] || null;
+    return "₹" + Number(n).toLocaleString("en-IN");
   }
 
   openEvent(e) {
-    this.navigate('event-detail');
+    this.navigate("event-detail/" + e.id);
   }
 
   ngOnDestroy() {

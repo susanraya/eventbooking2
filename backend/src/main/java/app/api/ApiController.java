@@ -8,13 +8,21 @@ import app.auth.InvalidCredentialsException;
 import app.auth.LoginRequest;
 import app.auth.RegisterRequest;
 import app.auth.ValidationErrorException;
+import app.events.EventRequest;
+import app.events.EventService;
+import app.events.TicketTypeRequest;
+import app.model.Event;
+import app.model.TicketType;
 import app.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,9 +41,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiController {
 
   private final AuthService authService;
+  private final EventService eventService;
 
-  public ApiController(AuthService authService) {
+  public ApiController(AuthService authService, EventService eventService) {
     this.authService = authService;
+    this.eventService = eventService;
   }
 
   /**
@@ -127,28 +137,49 @@ public class ApiController {
     return Map.of("withdrawnAt", withdrawnAt.toString());
   }
 
-  /** Organizer creates an event with validated required fields */
+  /** Organizer creates an event with validated required fields (AC-014, AC-015). */
   @PostMapping("/events")
-  public Map<String, String> postEvents() {
-    return Stubs.notImplemented("POST /events");
+  public ResponseEntity<Map<String, Object>> postEvents(
+      @RequestBody EventRequest request,
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+      HttpServletRequest httpRequest) {
+    User user = authService.requireUser(authorizationHeader);
+    Event event = eventService.createEvent(user, request, httpRequest.getRemoteAddr());
+    return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("eventId", event.getId()));
   }
 
-  /** Organizer updates their own event; changes reflect on the public listing */
+  /** Organizer updates their own event; a non-owner gets 403 (NFR-007). */
   @PutMapping("/events/{id}")
-  public Map<String, String> putEventsById() {
-    return Stubs.notImplemented("PUT /events/{id}");
+  public Map<String, Object> putEventsById(
+      @PathVariable String id,
+      @RequestBody EventRequest request,
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+      HttpServletRequest httpRequest) {
+    User user = authService.requireUser(authorizationHeader);
+    Event event = eventService.updateEvent(user, id, request, httpRequest.getRemoteAddr());
+    return Map.of("event", toEventMap(event));
   }
 
   /** Organizer defines a general-admission ticket type with name, INR price and quantity */
   @PostMapping("/events/{id}/ticket-types")
-  public Map<String, String> postEventsByIdTicketTypes() {
-    return Stubs.notImplemented("POST /events/{id}/ticket-types");
+  public ResponseEntity<Map<String, Object>> postEventsByIdTicketTypes(
+      @PathVariable String id,
+      @RequestBody TicketTypeRequest request,
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+      HttpServletRequest httpRequest) {
+    User user = authService.requireUser(authorizationHeader);
+    TicketType ticketType =
+        eventService.createTicketType(user, id, request, httpRequest.getRemoteAddr());
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(Map.of("ticketTypeId", ticketType.getId()));
   }
 
-  /** Organizer dashboard list of own events with status and tickets sold vs available */
+  /** Organizer dashboard list of own events with status, empty when they have none. */
   @GetMapping("/organizer/events")
-  public Map<String, String> getOrganizerEvents() {
-    return Stubs.notImplemented("GET /organizer/events");
+  public List<Map<String, Object>> getOrganizerEvents(
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+    User user = authService.requireUser(authorizationHeader);
+    return eventService.listOrganizerEvents(user).stream().map(this::toEventMap).toList();
   }
 
   /**
@@ -156,8 +187,40 @@ public class ApiController {
    * exhausted
    */
   @GetMapping("/events/{id}")
-  public Map<String, String> getEventsById() {
-    return Stubs.notImplemented("GET /events/{id}");
+  public Map<String, Object> getEventsById(@PathVariable String id) {
+    Event event = eventService.getPublishedEvent(id);
+    List<Map<String, Object>> ticketTypes =
+        eventService.ticketTypesFor(event).stream().map(this::toTicketTypeMap).toList();
+    Map<String, Object> result = new LinkedHashMap<>();
+    result.put("event", toEventMap(event));
+    result.put("ticketTypes", ticketTypes);
+    return result;
+  }
+
+  private Map<String, Object> toEventMap(Event event) {
+    Map<String, Object> map = new LinkedHashMap<>();
+    map.put("id", event.getId());
+    map.put("title", event.getTitle());
+    map.put("venue", event.getVenue());
+    map.put("city", event.getCity());
+    map.put("category", event.getCategory());
+    map.put("description", event.getDescription());
+    map.put("startsAt", event.getStartsAt().toString());
+    map.put("posterUrl", event.getPosterUrl());
+    map.put("status", event.getStatus());
+    map.put("organizerName", event.getOrganizer().getFullName());
+    return map;
+  }
+
+  private Map<String, Object> toTicketTypeMap(TicketType ticketType) {
+    Map<String, Object> map = new LinkedHashMap<>();
+    map.put("id", ticketType.getId());
+    map.put("name", ticketType.getName());
+    map.put("priceInr", ticketType.getPriceInr());
+    map.put("quantityTotal", ticketType.getQuantityTotal());
+    map.put("quantitySold", ticketType.getQuantitySold());
+    map.put("soldOut", ticketType.getQuantitySold() >= ticketType.getQuantityTotal());
+    return map;
   }
 
   /**
