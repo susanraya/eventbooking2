@@ -28,8 +28,22 @@ function sampleResponse() {
       organizerName: "Percept Live",
     },
     ticketTypes: [
-      { id: "tt-1", name: "Regular", priceInr: 999, quantityTotal: 500, quantitySold: 400, soldOut: false },
-      { id: "tt-2", name: "VIP Lounge", priceInr: 2499, quantityTotal: 120, quantitySold: 120, soldOut: true },
+      {
+        id: "tt-1",
+        name: "Regular",
+        priceInr: 999,
+        quantityTotal: 500,
+        quantitySold: 400,
+        soldOut: false,
+      },
+      {
+        id: "tt-2",
+        name: "VIP Lounge",
+        priceInr: 2499,
+        quantityTotal: 120,
+        quantitySold: 120,
+        soldOut: true,
+      },
     ],
   };
 }

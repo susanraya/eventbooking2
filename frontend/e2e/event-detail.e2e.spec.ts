@@ -118,10 +118,7 @@ test.describe("attendee event detail page against live backend data (US-010)", (
   // addable to the order summary) is covered against a stubbed response in
   // frontend/src/screens/event-detail.component.spec.ts ("[AC-026] ..."). Once POST /orders
   // is implemented this spec should add a real seed-an-order-to-exhaust-stock case.
-  test.skip(
-    "[AC-026] a ticket type with zero remaining quantity is labelled sold out, exposes no quantity control, and cannot be added to the order summary",
-    () => {},
-  );
+  test.skip("[AC-026] a ticket type with zero remaining quantity is labelled sold out, exposes no quantity control, and cannot be added to the order summary", () => {});
 
   test("a ticket type with stock can be selected and the order total reflects price x quantity", async ({
     page,
