@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic event booking qpp
 
-**Documentation version:** v5
+**Documentation version:** v6
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -26,12 +26,12 @@ basic event booking qpp
 | [Developer guide](development/developer-guide.md) | generated |
 | [API reference](development/api-reference.md) | 14 routes |
 | [Test report](testing/test-report.md) | not run yet |
-| [Tests](testing/test-cases.md) | 30 tests |
+| [Tests](testing/test-cases.md) | 73 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 1 release |
 | [Traceability matrix](traceability-matrix.md) | 14 requirements |
-| [Changelog](CHANGELOG.md) | 5 versions |
+| [Changelog](CHANGELOG.md) | 6 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -59,19 +59,14 @@ basic event booking qpp
 
 ### Development
 
-- All 7 epics show role=(unassigned) in the plan input -- no owning agent/role recorded at epic level.
-- Companion story US-005 (Withdraw consent) has no delivery record yet, so DPDP consent-withdrawal capability cannot be confirmed as built.
-- No delivery/ticket record for US-005 (Withdraw consent).
-- No delivery/ticket record for US-006 (Create an event listing).
-- No delivery/ticket record for US-007 (Define general-admission ticket types).
-- No delivery/ticket record for US-008 or its sub-tasks US-008-T1/T2/T3 (organizer dashboard).
-- No delivery/ticket record for US-009 or its sub-tasks US-009-T1/T2/T3 (browse/search).
-- No delivery/ticket record for US-010 (event detail page).
-- No delivery/ticket record for US-011 or its sub-tasks US-011-T1/T2/T3/T4 (booking & payment, incl. overselling protection).
-- No delivery/ticket record for US-012 or its sub-tasks US-012-T1/T2 (QR ticket issuance).
-- No delivery/ticket record for US-013 (my tickets view).
-- No delivery/ticket record for US-014 (responsive web app).
-- 'Development run status: completed' conflicts with the absence of delivery data for 10 of 14 stories -- needs confirmation from the development agent or run log before this phase can be considered fully documented.
+- Epics (EPIC-001 through EPIC-007) have no point estimates or assigned roles recorded in the plan input.
+- No named approver or approval date is given for the plan, only 'approved, version 1'.
+- No test or review evidence is included in this input to confirm the delivered code meets the consent-withdrawal requirement; that would need to be confirmed in the testing phase.
+- US-005 and US-006 share the identical commit hash; this may indicate a combined commit covering both tickets or a data-entry duplication -- worth confirming which is accurate.
+- No test or review evidence included to confirm functional completeness.
+- US-010 was planned to depend on event listings existing (US-006/US-007); no confirmation given that it was validated against the delivered event-creation code.
+- The development run status is reported as 'completed' at the top level, but only 4 of 14 planned stories (all from Sprint 2) have recorded ticket delivery -- this is a direct discrepancy that should be confirmed: either the run-level status is inaccurate, or delivery records for the other 10 stories were omitted from this input.
+- No status (in-progress, blocked, not-started) is given for any of these 10 stories individually, only their absence from the delivered-tickets list.
 
 ### Testing
 

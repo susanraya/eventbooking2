@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-30 tests · Passed 29 · Failed 0 · Skipped 0 · Not run 1
+73 tests · Passed 64 · Failed 0 · Skipped 0 · Not run 9
 
-Acceptance criteria covered: 10/36 · passing: 10/36
+Acceptance criteria covered: 12/36 · passing: 10/36
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -46,6 +46,71 @@ Acceptance criteria covered: 10/36 · passing: 10/36
 | AC-008 | App > [AC-008] redirects to the auth screen when navigating to a protected screen without a stored token | Unit | Passed | `frontend/src/app.component.spec.ts` |
 | AC-008 | App > [AC-008] signing out calls POST /auth/logout, clears the token and returns to the auth screen | Unit | Passed | `frontend/src/app.component.spec.ts` |
 | — | App > renders a screen inside the app shell and shows its menu | Unit | Passed | `frontend/src/app.component.spec.ts` |
+
+## Sprint 2
+
+### US-005: Withdraw consent
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| — | testAc001ValidTokenWithdrawsOnlyThatUsersConsentAndReturnsWithdrawnAt | Integration | Passed | `backend/src/test/java/app/api/ConsentWithdrawalIT.java` |
+| — | testAc002InvalidTokenReturns401AndRecordsNothing | Integration | Passed | `backend/src/test/java/app/api/ConsentWithdrawalIT.java` |
+| — | testAc002NoTokenReturns401AndRecordsNothing | Integration | Passed | `backend/src/test/java/app/api/ConsentWithdrawalIT.java` |
+| — | testAc003WithdrawalWritesAuditLogRowWithActorAndTimestampNfr006 | Integration | Passed | `backend/src/test/java/app/api/ConsentWithdrawalIT.java` |
+| — | [AC-api-failure] an API failure on withdrawal leaves consent Active and shows the inline error | E2E | Not run yet | `frontend/e2e/consent-withdrawal.e2e.spec.ts` |
+| — | [AC-cancel] cancelling the dialog leaves consent Active and makes no withdrawal | E2E | Not run yet | `frontend/e2e/consent-withdrawal.e2e.spec.ts` |
+| — | [AC-withdraw] a signed-in user withdraws consent: badge turns Withdrawn, the button disables, and the confirmation shows the recorded date and time | E2E | Not run yet | `frontend/e2e/consent-withdrawal.e2e.spec.ts` |
+
+### US-006: Create an event listing
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| — | testAc014OrganizerCreatesEventVisibleToUnauthenticatedAttendee | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testAc015InvalidStartsAtReturns400WithFieldError | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testAc015MissingCategoryReturns400WithFieldErrorAndNoRowPersisted | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testAc015MissingCityReturns400WithFieldErrorAndNoRowPersisted | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testAc015MissingDescriptionReturns400WithFieldErrorAndNoRowPersisted | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testAc015MissingStartsAtReturns400WithFieldErrorAndNoRowPersisted | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testAc015MissingTitleReturns400WithFieldErrorAndNoRowPersisted | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testAc015MissingVenueReturns400WithFieldErrorAndNoRowPersisted | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testEventMutationWritesAuditLogRowWithTimestamp | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testOrganizerEventsReturnsOnlyCallersEventsAndEmptyForNewOrganizer | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testPutByNonOwnerReturns403AndLeavesEventUnchangedThenOwnerUpdateIsVisible | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testUnauthenticatedGetOrganizerEventsReturns401 | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testUnauthenticatedPostEventsReturns401 | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+| — | testUnauthenticatedPutEventsByIdReturns401 | Integration | Passed | `backend/src/test/java/app/api/EventApiIT.java` |
+
+### US-007: Define general-admission ticket types
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| — | testAc016OwnerAddsTicketTypeAndItAppearsForSaleOnTheEvent | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testAc017TwoTicketTypesHoldIndependentQuantities | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testAc018RequestAndResponseHaveNoSeatFields | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testBlankNameReturns400WithFieldErrorAndPersistsNothing | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testGetEventByIdForUnknownIdReturns404 | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testGetEventByIdReturnsVenueCityDateDescriptionAndSoldOutFlags | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testNegativePriceReturns400WithFieldErrorAndPersistsNothing | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testNegativeQuantityReturns400WithFieldErrorAndPersistsNothing | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testNonOwnerAddingTicketTypeReceives403AndPersistsNothing | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testZeroPriceReturns400WithFieldErrorAndPersistsNothing | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+| — | testZeroQuantityReturns400WithFieldErrorAndPersistsNothing | Integration | Passed | `backend/src/test/java/app/api/TicketTypeApiIT.java` |
+
+### US-010: View event detail page
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-025 | event detail screen > [AC-025] loads GET /events/{id} for the routed event id and renders venue, city, date/time, category, description and ticket types with INR prices | Unit | Passed | `frontend/src/screens/event-detail.component.spec.ts` |
+| AC-026 | event detail screen > [AC-026] a sold-out ticket type renders as sold out with no quantity control and cannot be added to the order summary | Unit | Passed | `frontend/src/screens/event-detail.component.spec.ts` |
+| — | event detail screen > computes the order summary and total from the fetched ticket types | Unit | Passed | `frontend/src/screens/event-detail.component.spec.ts` |
+| — | event detail screen > shows a clear error state with a retry control when the request fails, and retry re-fetches | Unit | Passed | `frontend/src/screens/event-detail.component.spec.ts` |
+| — | event detail screen > shows a loading state while the request is in flight | Unit | Passed | `frontend/src/screens/event-detail.component.spec.ts` |
+| — | event detail screen > shows the empty-state component rather than an empty table when the event has no ticket types | Unit | Passed | `frontend/src/screens/event-detail.component.spec.ts` |
+| AC-025 | [AC-025] opening a seeded event's detail page shows its venue, date/time, description and each ticket type with its INR price | E2E | Not run yet | `frontend/e2e/event-detail.e2e.spec.ts` |
+| AC-026 | [AC-026] a ticket type with zero remaining quantity is labelled sold out, exposes no quantity control, and cannot be added to the order summary | E2E | Not run yet | `frontend/e2e/event-detail.e2e.spec.ts` |
+| — | [NFR-012] an event with no ticket types shows the empty state | E2E | Not run yet | `frontend/e2e/event-detail.e2e.spec.ts` |
+| — | [NFR-012] an unknown event id shows the error state | E2E | Not run yet | `frontend/e2e/event-detail.e2e.spec.ts` |
+| — | a ticket type with stock can be selected and the order total reflects price x quantity | E2E | Not run yet | `frontend/e2e/event-detail.e2e.spec.ts` |
 
 ## Project setup
 
