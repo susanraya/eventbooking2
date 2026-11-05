@@ -1,0 +1,75 @@
+{
+  "key": {
+    "app_design_id": "c5c024a0-7227-414e-a8cc-007eff410150",
+    "app_design_version": 1,
+    "architecture_document_id": "50b1b986-0b52-4a3c-af31-67ec63935e1a",
+    "architecture_version": 1
+  },
+  "outcome": "prepared",
+  "packages": [
+    {
+      "ecosystem": "maven",
+      "installed_version": "4.1.2",
+      "name": "spring-boot-starter-security",
+      "status": "installed",
+      "version": ""
+    },
+    {
+      "ecosystem": "maven",
+      "error": "Not in the environment after the install.",
+      "name": "io.jsonwebtoken:jjwt-api",
+      "status": "failed",
+      "version": "0.12.6"
+    },
+    {
+      "ecosystem": "maven",
+      "installed_version": "3.5.3",
+      "name": "com.google.zxing:core",
+      "status": "installed",
+      "version": "3.5.3"
+    },
+    {
+      "ecosystem": "maven",
+      "installed_version": "3.5.3",
+      "name": "com.google.zxing:javase",
+      "status": "installed",
+      "version": "3.5.3"
+    },
+    {
+      "ecosystem": "maven",
+      "installed_version": "1.4.8",
+      "name": "com.razorpay:razorpay-java",
+      "status": "installed",
+      "version": "1.4.8"
+    },
+    {
+      "ecosystem": "maven",
+      "installed_version": "4.10.2",
+      "name": "com.sendgrid:sendgrid-java",
+      "status": "installed",
+      "version": "4.10.2"
+    },
+    {
+      "ecosystem": "maven",
+      "error": "needs an exact version: Spring Boot does not manage this library",
+      "name": "com.meilisearch.sdk:meilisearch-java",
+      "status": "skipped",
+      "version": ""
+    },
+    {
+      "ecosystem": "maven",
+      "installed_version": "4.1.2",
+      "name": "spring-boot-starter-data-redis",
+      "status": "installed",
+      "version": ""
+    },
+    {
+      "ecosystem": "maven",
+      "error": "needs an exact version: Spring Boot does not manage this library",
+      "name": "software.amazon.awssdk:s3",
+      "status": "skipped",
+      "version": ""
+    }
+  ],
+  "prepared_by_run": "686848d6-d6ea-452c-aad1-2fa412691881"
+}
