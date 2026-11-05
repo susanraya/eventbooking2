@@ -1,8 +1,9 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Component, signal, computed } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
+import { ApiError, apiFetch, setSessionToken } from "@/lib/api";
 import { ScreenBase } from "@/lib/screen-base";
 import { UI_KIT } from "@/lib/ui";
 const template = `
@@ -249,7 +250,7 @@ const template = `
         @if (isRegister()) {
           <!-- Row 4 : consent notice -->
           <p data-wf="b-3-0" class="mt-8 text-left text-sm leading-relaxed tabular-nums">
-            We process your name, email and phone to create your account, confirm bookings and issue tickets. Consent notice v1.2, dated 1 Oct 2026.
+            We process your name, email and phone to {{ purposesLine() }}. Consent notice v{{ consentNotice.noticeVersion }}, dated {{ consentNotice.noticeDate }}.
           </p>
 
           <!-- Row 5 : DPDP consent -->
@@ -382,62 +383,64 @@ const template = `
 })
 export default class Screen extends ScreenBase {
   tabs = [
-    { id: 'signin', label: 'Sign in', wf: 'i-1-0-0' },
-    { id: 'attendee', label: 'Register as attendee', wf: 'i-1-0-1' },
-    { id: 'organizer', label: 'Register as organizer', wf: 'i-1-0-2' }
+    { id: "signin", label: "Sign in", wf: "i-1-0-0" },
+    { id: "attendee", label: "Register as attendee", wf: "i-1-0-1" },
+    { id: "organizer", label: "Register as organizer", wf: "i-1-0-2" },
   ];
 
-  tab = signal('signin');
+  tab = signal("signin");
 
-  fullName = signal('');
-  email = signal('');
-  password = signal('');
-  phone = signal('');
-  orgName = signal('');
-  contactDetails = signal('');
+  fullName = signal("");
+  email = signal("");
+  password = signal("");
+  phone = signal("");
+  orgName = signal("");
+  contactDetails = signal("");
   consent = signal(false);
   terms = signal(false);
 
   emptyErrors() {
     return {
-      fullName: '',
-      email: '',
-      password: '',
-      phone: '',
-      orgName: '',
-      contactDetails: '',
-      consent: '',
-      terms: ''
+      fullName: "",
+      email: "",
+      password: "",
+      phone: "",
+      orgName: "",
+      contactDetails: "",
+      consent: "",
+      terms: "",
     };
   }
 
   emptyNotice() {
-    return { kind: 'none', title: '', lines: [''] };
+    return { kind: "none", title: "", lines: [""] };
   }
 
   errors = signal(this.emptyErrors());
   formNotice = signal(this.emptyNotice());
-  pending = signal('');
-  phase = signal('idle');
+  pending = signal("");
+  phase = signal("idle");
 
-  noticeVersion = 'v1.2';
+  // Stands in for the consent notice the API supplies until US-001-1's register
+  // endpoint returns one: the purposes and notice version sent with a registration
+  // and shown to the attendee/organizer before they consent.
+  consentNotice = {
+    noticeVersion: "1.2",
+    noticeDate: "1 Oct 2026",
+    purposes: ["account creation", "booking confirmation", "ticket issue"],
+  };
 
-  registeredEmails = ['aarav.menon@gmail.com', 'priya@sitarahouse.in'];
+  purposesLine = () => this.consentNotice.purposes.join(", ");
 
-  accounts = [
-    { email: 'aarav.menon@gmail.com', password: 'Mumbai2026', role: 'attendee' },
-    { email: 'priya@sitarahouse.in', password: 'Sitara2026', role: 'organizer' }
-  ];
-
-  isRegister = computed(() => this.tab() !== 'signin');
-  isOrganizer = computed(() => this.tab() === 'organizer');
-  locked = computed(() => this.pending() !== '' || this.phase() === 'done');
-  activeNotice = computed(() => this.formNotice().kind === 'none' ? null : this.formNotice());
+  isRegister = computed(() => this.tab() !== "signin");
+  isOrganizer = computed(() => this.tab() === "organizer");
+  locked = computed(() => this.pending() !== "" || this.phase() === "done");
+  activeNotice = computed(() => (this.formNotice().kind === "none" ? null : this.formNotice()));
 
   noteIcon(kind) {
-    if (kind === 'success') return 'CheckCircle';
-    if (kind === 'info') return 'Clock';
-    return 'AlertCircle';
+    if (kind === "success") return "CheckCircle";
+    if (kind === "info") return "Clock";
+    return "AlertCircle";
   }
 
   clearNotice() {
@@ -452,23 +455,23 @@ export default class Screen extends ScreenBase {
   }
 
   onTabKeys(event) {
-    const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+    const keys = ["ArrowRight", "ArrowLeft", "Home", "End"];
     if (keys.indexOf(event.key) === -1) return;
     event.preventDefault();
     const ids = this.tabs.map((t) => t.id);
     let i = ids.indexOf(this.tab());
-    if (event.key === 'ArrowRight') i = (i + 1) % ids.length;
-    if (event.key === 'ArrowLeft') i = (i - 1 + ids.length) % ids.length;
-    if (event.key === 'Home') i = 0;
-    if (event.key === 'End') i = ids.length - 1;
+    if (event.key === "ArrowRight") i = (i + 1) % ids.length;
+    if (event.key === "ArrowLeft") i = (i - 1 + ids.length) % ids.length;
+    if (event.key === "Home") i = 0;
+    if (event.key === "End") i = ids.length - 1;
     this.selectTab(ids[i]);
-    const el = document.getElementById('tab-' + ids[i]);
+    const el = document.getElementById("tab-" + ids[i]);
     if (el) el.focus();
   }
 
   onEnter(event) {
-    const tag = event.target && event.target.tagName ? event.target.tagName.toUpperCase() : '';
-    if (tag === 'TEXTAREA' || tag === 'BUTTON') return;
+    const tag = event.target && event.target.tagName ? event.target.tagName.toUpperCase() : "";
+    if (tag === "TEXTAREA" || tag === "BUTTON") return;
     event.preventDefault();
     if (this.isRegister()) this.createAccount();
     else this.signIn();
@@ -479,35 +482,52 @@ export default class Screen extends ScreenBase {
     const email = this.email().trim();
     const pwd = this.password();
 
-    if (!email) e.email = 'Enter the email address on your account.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'That does not look like an email address. Use a format like aarav.menon@gmail.com.';
+    if (!email) e.email = "Enter the email address on your account.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      e.email =
+        "That does not look like an email address. Use a format like aarav.menon@gmail.com.";
 
-    if (!pwd) e.password = 'Enter your password.';
+    if (!pwd) e.password = "Enter your password.";
 
     if (asRegister) {
-      if (!this.fullName().trim()) e.fullName = 'Tell us the name that should be printed on your tickets.';
-      if (pwd && (pwd.length < 8 || !/[0-9]/.test(pwd))) e.password = 'Password needs at least 8 characters and 1 number.';
+      if (!this.fullName().trim())
+        e.fullName = "Tell us the name that should be printed on your tickets.";
+      if (pwd && (pwd.length < 8 || !/[0-9]/.test(pwd)))
+        e.password = "Password needs at least 8 characters and 1 number.";
 
-      const digits = this.phone().replace(/[^0-9]/g, '');
-      if (!this.phone().trim()) e.phone = 'Enter a mobile number so we can confirm your bookings.';
-      else if (!(digits.length === 10 || (digits.length === 12 && digits.indexOf('91') === 0))) e.phone = 'Enter a 10-digit Indian mobile number.';
+      const digits = this.phone().replace(/[^0-9]/g, "");
+      if (!this.phone().trim()) e.phone = "Enter a mobile number so we can confirm your bookings.";
+      else if (!(digits.length === 10 || (digits.length === 12 && digits.indexOf("91") === 0)))
+        e.phone = "Enter a 10-digit Indian mobile number.";
 
-      if (!e.email && this.registeredEmails.indexOf(email.toLowerCase()) !== -1) e.email = 'That email is already in use.';
+      // Whether the email is already registered is checked by the API (409 on submit);
+      // client-side we only check its shape, above.
 
       if (this.isOrganizer()) {
-        if (!this.orgName().trim()) e.orgName = 'Enter the name attendees will see on your listings.';
-        if (!this.contactDetails().trim()) e.contactDetails = 'Add a phone number or email for attendee queries.';
+        if (!this.orgName().trim())
+          e.orgName = "Enter the name attendees will see on your listings.";
+        if (!this.contactDetails().trim())
+          e.contactDetails = "Add a phone number or email for attendee queries.";
       }
 
-      if (!this.consent()) e.consent = 'Consent is required before registration can be completed.';
-      if (!this.terms()) e.terms = 'Accept the Terms of Service to continue.';
+      if (!this.consent()) e.consent = "Consent is required before registration can be completed.";
+      if (!this.terms()) e.terms = "Accept the Terms of Service to continue.";
     }
 
     return e;
   }
 
   orderedMessages(errs) {
-    const order = ['fullName', 'email', 'password', 'phone', 'orgName', 'contactDetails', 'consent', 'terms'];
+    const order = [
+      "fullName",
+      "email",
+      "password",
+      "phone",
+      "orgName",
+      "contactDetails",
+      "consent",
+      "terms",
+    ];
     const lines = [];
     for (let i = 0; i < order.length; i++) {
       if (errs[order[i]]) lines.push(errs[order[i]]);
@@ -516,25 +536,42 @@ export default class Screen extends ScreenBase {
   }
 
   stamp() {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const d = new Date();
-    const hh = ('0' + d.getHours()).slice(-2);
-    const mm = ('0' + d.getMinutes()).slice(-2);
-    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' at ' + hh + ':' + mm;
+    const hh = ("0" + d.getHours()).slice(-2);
+    const mm = ("0" + d.getMinutes()).slice(-2);
+    return (
+      d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear() + " at " + hh + ":" + mm
+    );
   }
 
   createAccount() {
     if (this.locked()) return;
 
     if (!this.isRegister()) {
-      this.tab.set('attendee');
+      this.tab.set("attendee");
       this.errors.set(this.emptyErrors());
       this.formNotice.set({
-        kind: 'info',
-        title: 'Choose how to register',
-        lines: ['Switched to Register as attendee. Add your name and phone, tick consent, then create your account.']
+        kind: "info",
+        title: "Choose how to register",
+        lines: [
+          "Switched to Register as attendee. Add your name and phone, tick consent, then create your account.",
+        ],
       });
-      const el = document.getElementById('tab-attendee');
+      const el = document.getElementById("tab-attendee");
       if (el) el.focus();
       return;
     }
@@ -545,52 +582,144 @@ export default class Screen extends ScreenBase {
 
     if (lines.length) {
       this.formNotice.set({
-        kind: 'error',
-        title: 'Before we can open the doors',
-        lines: lines
+        kind: "error",
+        title: "Before we can open the doors",
+        lines: lines,
       });
       return;
     }
 
-    this.pending.set('create');
+    this.pending.set("create");
     this.formNotice.set({
-      kind: 'info',
-      title: 'Creating your account',
-      lines: ['Recording your consent against notice ' + this.noticeVersion + ' and setting up your account.']
+      kind: "info",
+      title: "Creating your account",
+      lines: [
+        "Recording your consent against notice " +
+          this.consentNotice.noticeVersion +
+          " and setting up your account.",
+      ],
     });
 
-    setTimeout(() => {
-      const role = this.isOrganizer() ? 'organizer' : 'attendee';
-      this.registeredEmails = this.registeredEmails.concat([this.email().trim().toLowerCase()]);
-      this.pending.set('');
-      this.phase.set('done');
-      this.formNotice.set({
-        kind: 'success',
-        title: 'Account created',
-        lines: [
-          'Welcome, ' + this.fullName().trim() + '. Your ' + role + ' account is live and you are signed in.',
-          'Consent recorded for account creation, booking confirmation and ticket issue. Notice ' + this.noticeVersion + ', ' + this.stamp() + '.',
-          'Taking you to Browse Events.'
-        ]
+    const role = this.isOrganizer() ? "organizer" : "attendee";
+    const payload = {
+      role: role,
+      email: this.email().trim().toLowerCase(),
+      password: this.password(),
+      fullName: this.fullName().trim(),
+      phone: this.phone().trim(),
+      consent: {
+        given: this.consent(),
+        noticeVersion: this.consentNotice.noticeVersion,
+        purposes: this.consentNotice.purposes,
+      },
+      ...(this.isOrganizer()
+        ? {
+            organization: {
+              name: this.orgName().trim(),
+              contactDetails: this.contactDetails().trim(),
+            },
+          }
+        : {}),
+    };
+
+    apiFetch("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        this.pending.set("");
+        this.phase.set("done");
+        setSessionToken(res.token);
+        const grantedRole = res.role || role;
+        this.formNotice.set({
+          kind: "success",
+          title: "Account created",
+          lines: [
+            "Welcome, " +
+              this.fullName().trim() +
+              ". Your " +
+              grantedRole +
+              " account is live and you are signed in.",
+            "Consent recorded for " +
+              this.purposesLine() +
+              ". Notice " +
+              this.consentNotice.noticeVersion +
+              ", " +
+              this.stamp() +
+              ".",
+            grantedRole === "organizer"
+              ? "Taking you to your organizer dashboard."
+              : "Taking you to Browse Events.",
+          ],
+        });
+        setTimeout(() => {
+          this.navigate(grantedRole === "organizer" ? "organizer-dashboard" : "events");
+        }, 900);
+      })
+      .catch((err) => {
+        this.pending.set("");
+        const status = err instanceof ApiError ? err.status : 0;
+        const body =
+          err instanceof ApiError && err.body && typeof err.body === "object" ? err.body : {};
+
+        if (status === 409) {
+          const msg = body.message || "That email is already in use.";
+          this.errors.set({ ...this.emptyErrors(), email: msg });
+          this.formNotice.set({
+            kind: "error",
+            title: "That email is already in use",
+            lines: [msg],
+          });
+          return;
+        }
+
+        if (status === 400 && body.fieldErrors) {
+          const fieldMap = {
+            fullName: "fullName",
+            email: "email",
+            password: "password",
+            phone: "phone",
+            organization: "orgName",
+            organizationName: "orgName",
+            contactDetails: "contactDetails",
+            consent: "consent",
+          };
+          const mapped = this.emptyErrors();
+          Object.keys(body.fieldErrors).forEach((key) => {
+            const target = fieldMap[key] || key;
+            if (target in mapped) mapped[target] = body.fieldErrors[key];
+          });
+          this.errors.set(mapped);
+          this.formNotice.set({
+            kind: "error",
+            title: "Check these details",
+            lines: this.orderedMessages(mapped),
+          });
+          return;
+        }
+
+        this.formNotice.set({
+          kind: "error",
+          title: "We could not create your account",
+          lines: [
+            "Something went wrong while creating your account. Nothing was saved. Please try again.",
+          ],
+        });
       });
-      setTimeout(() => {
-        this.navigate('events');
-      }, 900);
-    }, 800);
   }
 
   signIn() {
     if (this.locked()) return;
 
     if (this.isRegister()) {
-      this.tab.set('signin');
+      this.tab.set("signin");
       this.errors.set(this.emptyErrors());
       this.formNotice.set({
-        kind: 'info',
-        title: 'Already have an account',
-        lines: ['Switched to Sign in. Everything you typed is still here.']
+        kind: "info",
+        title: "Already have an account",
+        lines: ["Switched to Sign in. Everything you typed is still here."],
       });
-      const el = document.getElementById('tab-signin');
+      const el = document.getElementById("tab-signin");
       if (el) el.focus();
       return;
     }
@@ -601,56 +730,52 @@ export default class Screen extends ScreenBase {
 
     if (lines.length) {
       this.formNotice.set({
-        kind: 'error',
-        title: 'Check these details',
-        lines: lines
+        kind: "error",
+        title: "Check these details",
+        lines: lines,
       });
       return;
     }
 
-    this.pending.set('signin');
+    this.pending.set("signin");
     this.formNotice.set({
-      kind: 'info',
-      title: 'Checking your details',
-      lines: ['One moment while we match your email and password.']
+      kind: "info",
+      title: "Checking your details",
+      lines: ["One moment while we match your email and password."],
     });
 
-    setTimeout(() => {
-      const email = this.email().trim().toLowerCase();
-      const pwd = this.password();
-      let match = { email: '', password: '', role: '' };
-      let found = false;
-      for (let i = 0; i < this.accounts.length; i++) {
-        if (this.accounts[i].email === email && this.accounts[i].password === pwd) {
-          match = this.accounts[i];
-          found = true;
-        }
-      }
+    const email = this.email().trim().toLowerCase();
+    const pwd = this.password();
 
-      this.pending.set('');
-
-      if (!found) {
+    apiFetch("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password: pwd }),
+    })
+      .then((res) => {
+        this.pending.set("");
+        this.phase.set("done");
+        setSessionToken(res.token);
+        const role = res.role;
         this.formNotice.set({
-          kind: 'error',
-          title: 'We could not sign you in',
-          lines: ['Those sign-in details do not match an account. Check the email and password and try again.']
+          kind: "success",
+          title: "Signed in",
+          lines:
+            role === "organizer"
+              ? ["Welcome back. Opening your organizer dashboard."]
+              : ["Welcome back. Opening Browse Events."],
         });
-        return;
-      }
 
-      this.phase.set('done');
-      this.formNotice.set({
-        kind: 'success',
-        title: 'Signed in',
-        lines: match.role === 'organizer'
-          ? ['Welcome back. Opening your organizer dashboard.']
-          : ['Welcome back. Opening Browse Events.']
+        setTimeout(() => {
+          this.navigate(role === "organizer" ? "organizer-dashboard" : "events");
+        }, 700);
+      })
+      .catch(() => {
+        this.pending.set("");
+        this.formNotice.set({
+          kind: "error",
+          title: "We could not sign you in",
+          lines: ["Email or password is incorrect."],
+        });
       });
-
-      setTimeout(() => {
-        if (match.role === 'organizer') this.navigate('organizer-dashboard');
-        else this.navigate('events');
-      }, 700);
-    }, 800);
   }
 }

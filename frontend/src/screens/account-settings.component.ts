@@ -1,8 +1,9 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Component, signal, computed, effect } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
+import { apiFetch } from "@/lib/api";
 import { ScreenBase } from "@/lib/screen-base";
 import { UI_KIT } from "@/lib/ui";
 const template = `
@@ -336,92 +337,106 @@ const template = `
   template,
 })
 export default class Screen extends ScreenBase {
-  hairline = 'rgba(121, 133, 122, 0.35)';
+  hairline = "rgba(121, 133, 122, 0.35)";
 
   profile = signal({
-    full_name: 'Ananya Raghavan',
-    email: 'ananya.raghavan@gmail.com',
-    phone: '+91 98204 41127',
-    role: 'Attendee'
+    full_name: "Ananya Raghavan",
+    email: "ananya.raghavan@gmail.com",
+    phone: "+91 98204 41127",
+    role: "Attendee",
   });
 
   consent = signal({
-    purposes: ['Account', 'Bookings', 'Ticketing'],
-    notice_version: '1.2',
+    purposes: ["Account", "Bookings", "Ticketing"],
+    notice_version: "1.2",
     consent_given: true,
-    granted_at: '14 Oct 2026, 10:24 IST',
-    withdrawn_at: null
+    granted_at: "14 Oct 2026, 10:24 IST",
+    withdrawn_at: null,
   });
 
-  lastSynced = signal('16:38 IST');
+  lastSynced = signal("16:38 IST");
   dialogOpen = signal(false);
   dialogShown = signal(false);
   submitting = signal(false);
-  errorMessage = signal('');
+  errorMessage = signal("");
   recordShown = signal(false);
 
   withdrawn = computed(() => this.consent().withdrawn_at !== null);
-  purposeLine = computed(() => this.consent().purposes.join(', ').toLowerCase());
+  purposeLine = computed(() => this.consent().purposes.join(", ").toLowerCase());
 
   focusConfirm = effect(() => {
     if (this.dialogShown()) {
       setTimeout(() => {
-        const el = document.getElementById('confirm-withdrawal');
-        if (el) { el.focus(); }
+        const el = document.getElementById("confirm-withdrawal");
+        if (el) {
+          el.focus();
+        }
       }, 30);
     }
   });
 
   openDialog() {
-    if (this.withdrawn()) { return; }
-    this.errorMessage.set('');
+    if (this.withdrawn()) {
+      return;
+    }
+    this.errorMessage.set("");
     this.dialogOpen.set(true);
     setTimeout(() => this.dialogShown.set(true), 10);
   }
 
   closeDialog() {
-    if (this.submitting()) { return; }
+    if (this.submitting()) {
+      return;
+    }
     this.dialogShown.set(false);
     setTimeout(() => {
       this.dialogOpen.set(false);
-      const el = document.getElementById('withdraw-consent');
-      if (el && !el.disabled) { el.focus(); }
+      const el = document.getElementById("withdraw-consent");
+      if (el && !el.disabled) {
+        el.focus();
+      }
     }, 170);
   }
 
   confirmWithdrawal() {
-    if (this.submitting()) { return; }
+    if (this.submitting()) {
+      return;
+    }
     this.submitting.set(true);
-    this.errorMessage.set('');
+    this.errorMessage.set("");
 
-    setTimeout(() => {
-      const online = (typeof navigator === 'undefined') ? true : navigator.onLine !== false;
-
-      if (!online) {
+    apiFetch("/consent/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ purposes: this.consent().purposes }),
+    })
+      .then((res) => {
+        this.consent.update(function (record) {
+          return {
+            purposes: record.purposes,
+            notice_version: record.notice_version,
+            consent_given: false,
+            granted_at: record.granted_at,
+            withdrawn_at: res && res.withdrawnAt ? res.withdrawnAt : new Date().toISOString(),
+          };
+        });
+        this.lastSynced.set(new Date().toISOString());
         this.submitting.set(false);
-        this.errorMessage.set('we could not reach the consent register. Your consent is unchanged and nothing has been sent. Try again once you are back on a connection.');
-        return;
-      }
+        this.dialogShown.set(false);
 
-      this.consent.update(function (record) {
-        return {
-          purposes: record.purposes,
-          notice_version: record.notice_version,
-          consent_given: false,
-          granted_at: record.granted_at,
-          withdrawn_at: '5 Nov 2026, 16:40 IST'
-        };
+        setTimeout(() => {
+          this.dialogOpen.set(false);
+          this.recordShown.set(true);
+          const el = document.getElementById("withdrawal-record");
+          if (el) {
+            el.focus();
+          }
+        }, 170);
+      })
+      .catch(() => {
+        this.submitting.set(false);
+        this.errorMessage.set(
+          "we could not reach the consent register. Your consent is unchanged and nothing has been sent. Try again once you are back on a connection.",
+        );
       });
-      this.lastSynced.set('16:40 IST');
-      this.submitting.set(false);
-      this.dialogShown.set(false);
-
-      setTimeout(() => {
-        this.dialogOpen.set(false);
-        this.recordShown.set(true);
-        const el = document.getElementById('withdrawal-record');
-        if (el) { el.focus(); }
-      }, 170);
-    }, 850);
   }
 }
