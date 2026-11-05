@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -59,6 +60,7 @@ public class EventService {
   }
 
   /** NFR-007: only the owning organizer may update; a non-owner gets 403, nothing changes. */
+  @Transactional
   public Event updateEvent(User user, String id, EventRequest request, String ipAddress) {
     Event event =
         eventRepository
@@ -81,15 +83,20 @@ public class EventService {
     }
     eventRepository.save(event);
     audit(user, "event.update", event.getId(), ipAddress);
+    initializeOrganizer(event);
     return event;
   }
 
   /** The signed-in organizer's own events, empty when they have none (NFR-012). */
+  @Transactional(readOnly = true)
   public List<Event> listOrganizerEvents(User organizer) {
-    return eventRepository.findByOrganizer(organizer);
+    List<Event> events = eventRepository.findByOrganizer(organizer);
+    events.forEach(this::initializeOrganizer);
+    return events;
   }
 
   /** The public event read path: only a published event is visible. */
+  @Transactional(readOnly = true)
   public Event getPublishedEvent(String id) {
     Event event =
         eventRepository
@@ -99,11 +106,59 @@ public class EventService {
     if (!"published".equals(event.getStatus())) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "event not found");
     }
+    initializeOrganizer(event);
     return event;
   }
 
   public List<TicketType> ticketTypesFor(Event event) {
     return ticketTypeRepository.findByEvent(event);
+  }
+
+  /** Forces the lazy organizer proxy to load while the session is still open. */
+  private void initializeOrganizer(Event event) {
+    event.getOrganizer().getFullName();
+  }
+
+  /**
+   * AC-016, AC-017: creates a general-admission ticket type with its own independent quantity;
+   * NFR-007: only the owning organizer may add one.
+   */
+  @Transactional
+  public TicketType createTicketType(
+      User user, String eventId, TicketTypeRequest request, String ipAddress) {
+    Event event =
+        eventRepository
+            .findById(eventId)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "event not found"));
+    if (!event.getOrganizer().getId().equals(user.getId())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not the owner of this event");
+    }
+
+    Map<String, String> errors = new LinkedHashMap<>();
+    if (request.name() == null || request.name().isBlank()) {
+      errors.put("name", "is required");
+    }
+    if (request.priceInr() == null || request.priceInr().signum() <= 0) {
+      errors.put("priceInr", "must be a positive amount");
+    }
+    if (request.quantityTotal() == null || request.quantityTotal() <= 0) {
+      errors.put("quantityTotal", "must be a positive quantity");
+    }
+    if (!errors.isEmpty()) {
+      throw new ValidationErrorException(errors);
+    }
+
+    TicketType ticketType = new TicketType();
+    ticketType.setId(UUID.randomUUID().toString());
+    ticketType.setEvent(event);
+    ticketType.setName(request.name().strip());
+    ticketType.setPriceInr(request.priceInr());
+    ticketType.setQuantityTotal(request.quantityTotal());
+    ticketType.setQuantitySold(0);
+    ticketTypeRepository.save(ticketType);
+    audit(user, "ticket_type.create", ticketType.getId(), ipAddress);
+    return ticketType;
   }
 
   private void applyFields(Event event, EventRequest request, LocalDateTime startsAt) {

@@ -10,6 +10,7 @@ import app.auth.RegisterRequest;
 import app.auth.ValidationErrorException;
 import app.events.EventRequest;
 import app.events.EventService;
+import app.events.TicketTypeRequest;
 import app.model.Event;
 import app.model.TicketType;
 import app.model.User;
@@ -161,8 +162,16 @@ public class ApiController {
 
   /** Organizer defines a general-admission ticket type with name, INR price and quantity */
   @PostMapping("/events/{id}/ticket-types")
-  public Map<String, String> postEventsByIdTicketTypes() {
-    return Stubs.notImplemented("POST /events/{id}/ticket-types");
+  public ResponseEntity<Map<String, Object>> postEventsByIdTicketTypes(
+      @PathVariable String id,
+      @RequestBody TicketTypeRequest request,
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+      HttpServletRequest httpRequest) {
+    User user = authService.requireUser(authorizationHeader);
+    TicketType ticketType =
+        eventService.createTicketType(user, id, request, httpRequest.getRemoteAddr());
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(Map.of("ticketTypeId", ticketType.getId()));
   }
 
   /** Organizer dashboard list of own events with status, empty when they have none. */
@@ -199,6 +208,7 @@ public class ApiController {
     map.put("startsAt", event.getStartsAt().toString());
     map.put("posterUrl", event.getPosterUrl());
     map.put("status", event.getStatus());
+    map.put("organizerName", event.getOrganizer().getFullName());
     return map;
   }
 
