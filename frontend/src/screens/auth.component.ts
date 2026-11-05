@@ -1,5 +1,5 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
- 
+
 import { Component, signal, computed } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
@@ -432,11 +432,6 @@ export default class Screen extends ScreenBase {
 
   purposesLine = () => this.consentNotice.purposes.join(", ");
 
-  accounts = [
-    { email: "aarav.menon@gmail.com", password: "Mumbai2026", role: "attendee" },
-    { email: "priya@sitarahouse.in", password: "Sitara2026", role: "organizer" },
-  ];
-
   isRegister = computed(() => this.tab() !== "signin");
   isOrganizer = computed(() => this.tab() === "organizer");
   locked = computed(() => this.pending() !== "" || this.phase() === "done");
@@ -664,7 +659,8 @@ export default class Screen extends ScreenBase {
       .catch((err) => {
         this.pending.set("");
         const status = err instanceof ApiError ? err.status : 0;
-        const body = err instanceof ApiError && err.body && typeof err.body === "object" ? err.body : {};
+        const body =
+          err instanceof ApiError && err.body && typeof err.body === "object" ? err.body : {};
 
         if (status === 409) {
           const msg = body.message || "That email is already in use.";
@@ -748,45 +744,38 @@ export default class Screen extends ScreenBase {
       lines: ["One moment while we match your email and password."],
     });
 
-    setTimeout(() => {
-      const email = this.email().trim().toLowerCase();
-      const pwd = this.password();
-      let match = { email: "", password: "", role: "" };
-      let found = false;
-      for (let i = 0; i < this.accounts.length; i++) {
-        if (this.accounts[i].email === email && this.accounts[i].password === pwd) {
-          match = this.accounts[i];
-          found = true;
-        }
-      }
+    const email = this.email().trim().toLowerCase();
+    const pwd = this.password();
 
-      this.pending.set("");
+    apiFetch("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password: pwd }),
+    })
+      .then((res) => {
+        this.pending.set("");
+        this.phase.set("done");
+        setSessionToken(res.token);
+        const role = res.role;
+        this.formNotice.set({
+          kind: "success",
+          title: "Signed in",
+          lines:
+            role === "organizer"
+              ? ["Welcome back. Opening your organizer dashboard."]
+              : ["Welcome back. Opening Browse Events."],
+        });
 
-      if (!found) {
+        setTimeout(() => {
+          this.navigate(role === "organizer" ? "organizer-dashboard" : "events");
+        }, 700);
+      })
+      .catch(() => {
+        this.pending.set("");
         this.formNotice.set({
           kind: "error",
           title: "We could not sign you in",
-          lines: [
-            "Those sign-in details do not match an account. Check the email and password and try again.",
-          ],
+          lines: ["Email or password is incorrect."],
         });
-        return;
-      }
-
-      this.phase.set("done");
-      this.formNotice.set({
-        kind: "success",
-        title: "Signed in",
-        lines:
-          match.role === "organizer"
-            ? ["Welcome back. Opening your organizer dashboard."]
-            : ["Welcome back. Opening Browse Events."],
       });
-
-      setTimeout(() => {
-        if (match.role === "organizer") this.navigate("organizer-dashboard");
-        else this.navigate("events");
-      }, 700);
-    }, 800);
   }
 }

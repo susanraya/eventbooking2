@@ -4,6 +4,8 @@ import app.Stubs;
 import app.auth.AuthService;
 import app.auth.ConsentNotice;
 import app.auth.EmailInUseException;
+import app.auth.InvalidCredentialsException;
+import app.auth.LoginRequest;
 import app.auth.RegisterRequest;
 import app.auth.ValidationErrorException;
 import app.model.User;
@@ -80,14 +82,39 @@ public class ApiController {
 
   /** Authenticate credentials and return a JWT; failures give a generic error */
   @PostMapping("/auth/login")
-  public Map<String, String> postAuthLogin() {
-    return Stubs.notImplemented("POST /auth/login");
+  public Map<String, Object> postAuthLogin(
+      @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+    AuthService.LoginResult result =
+        authService.login(request.email(), request.password(), httpRequest.getRemoteAddr());
+    User user = result.user();
+    return Map.of(
+        "token",
+        result.token(),
+        "user",
+        Map.of(
+            "id", user.getId(),
+            "email", user.getEmail(),
+            "role", user.getRole(),
+            "fullName", user.getFullName()),
+        "home",
+        result.home());
+  }
+
+  /** AC-007, NFR-002: the same generic failure for an unknown email or a wrong password. */
+  @ExceptionHandler(InvalidCredentialsException.class)
+  public ResponseEntity<Map<String, Object>> handleInvalidCredentials(
+      InvalidCredentialsException e) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(Map.of("error", "invalid_credentials", "message", "Email or password is incorrect."));
   }
 
   /** End the current session so protected pages require re-auth */
   @PostMapping("/auth/logout")
-  public Map<String, String> postAuthLogout() {
-    return Stubs.notImplemented("POST /auth/logout");
+  public ResponseEntity<Void> postAuthLogout(
+      @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+      HttpServletRequest httpRequest) {
+    authService.logout(authorizationHeader, httpRequest.getRemoteAddr());
+    return ResponseEntity.noContent().build();
   }
 
   /** Record a consent withdrawal with timestamp through a flow no harder than granting */

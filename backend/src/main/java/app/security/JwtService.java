@@ -5,8 +5,10 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,10 +31,14 @@ public class JwtService {
     this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
   }
 
-  /** A signed session token identifying this user, carrying their email and role. */
+  /**
+   * A signed session token identifying this user, carrying their email and role, and a unique jti a
+   * revocation entry can later be keyed to (US-003).
+   */
   public String issue(String userId, String email, String role) {
     Instant now = Instant.now();
     return Jwts.builder()
+        .id(UUID.randomUUID().toString())
         .subject(userId)
         .claim("email", email)
         .claim("role", role)
@@ -45,5 +51,10 @@ public class JwtService {
   /** The verified claims of a token; throws if the signature, expiry or shape is wrong. */
   public Jws<Claims> parse(String token) {
     return Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+  }
+
+  /** Time left until {@code claims} expires; a revocation entry's TTL should never exceed this. */
+  public Duration remainingValidity(Claims claims) {
+    return Duration.between(Instant.now(), claims.getExpiration().toInstant());
   }
 }

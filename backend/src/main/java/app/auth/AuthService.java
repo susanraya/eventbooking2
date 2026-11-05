@@ -9,8 +9,12 @@ import app.model.OrganizerProfileRepository;
 import app.model.User;
 import app.model.UserRepository;
 import app.security.JwtService;
+import app.security.TokenRevocationService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -38,6 +42,7 @@ public class AuthService {
   private final AuditLogRepository auditLogRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
+  private final TokenRevocationService tokenRevocationService;
 
   public AuthService(
       UserRepository userRepository,
@@ -45,13 +50,15 @@ public class AuthService {
       ConsentRecordRepository consentRecordRepository,
       AuditLogRepository auditLogRepository,
       PasswordEncoder passwordEncoder,
-      JwtService jwtService) {
+      JwtService jwtService,
+      TokenRevocationService tokenRevocationService) {
     this.userRepository = userRepository;
     this.organizerProfileRepository = organizerProfileRepository;
     this.consentRecordRepository = consentRecordRepository;
     this.auditLogRepository = auditLogRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
+    this.tokenRevocationService = tokenRevocationService;
   }
 
   /** The outcome of a successful registration: the new, signed-in user and their session token. */
@@ -105,6 +112,53 @@ public class AuthService {
     return new RegisterResult(user, token);
   }
 
+  /** The outcome of a successful sign-in: the user, their session token, and a routing hint. */
+  public record LoginResult(User user, String token, String home) {}
+
+  /**
+   * Authenticates email/password; an unknown email and a wrong password both throw the same {@link
+   * InvalidCredentialsException} (AC-007, NFR-002). Writes one audit_logs row either way, recording
+   * only the outcome -- never the submitted password.
+   */
+  public LoginResult login(String rawEmail, String rawPassword, String ipAddress) {
+    String email = rawEmail == null ? "" : rawEmail.strip().toLowerCase(Locale.ROOT);
+    String password = rawPassword == null ? "" : rawPassword;
+    User user = userRepository.findByEmail(email).orElse(null);
+    if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+      audit(user, "user.login", "users", user == null ? null : user.getId(), ipAddress, "failure");
+      throw new InvalidCredentialsException();
+    }
+    audit(user, "user.login", "users", user.getId(), ipAddress, "success");
+    String token = jwtService.issue(user.getId(), user.getEmail(), user.getRole());
+    String home = "organizer".equals(user.getRole()) ? "organizer-dashboard" : "events";
+    return new LoginResult(user, token, home);
+  }
+
+  /**
+   * Ends the session the presented bearer token carries (NFR-003): revokes its jti in Redis for
+   * exactly the token's remaining lifetime, so a later call with the same token is rejected.
+   */
+  public void logout(String authorizationHeader, String ipAddress) {
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "missing bearer token");
+    }
+    String token = authorizationHeader.substring("Bearer ".length()).strip();
+    Jws<Claims> parsed;
+    try {
+      parsed = jwtService.parse(token);
+    } catch (RuntimeException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid or expired token");
+    }
+    Claims claims = parsed.getPayload();
+    User user =
+        userRepository
+            .findById(claims.getSubject())
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unknown user"));
+    tokenRevocationService.revoke(claims.getId(), jwtService.remainingValidity(claims));
+    audit(user, "user.logout", "users", user.getId(), ipAddress, "success");
+  }
+
   /** The caller identified by a verified {@code Authorization: Bearer} token; fails closed. */
   public User requireUser(String authorizationHeader) {
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -137,6 +191,11 @@ public class AuthService {
   }
 
   private void audit(User actor, String action, String entity, String entityId, String ipAddress) {
+    audit(actor, action, entity, entityId, ipAddress, "success");
+  }
+
+  private void audit(
+      User actor, String action, String entity, String entityId, String ipAddress, String outcome) {
     AuditLog log = new AuditLog();
     log.setId(UUID.randomUUID().toString());
     log.setActorUser(actor);
@@ -144,6 +203,7 @@ public class AuthService {
     log.setEntity(entity);
     log.setEntityId(entityId);
     log.setIpAddress(ipAddress);
+    log.setOutcome(outcome);
     log.setCreatedAt(LocalDateTime.now());
     auditLogRepository.save(log);
   }

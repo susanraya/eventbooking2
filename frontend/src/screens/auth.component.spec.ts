@@ -175,6 +175,59 @@ describe("auth screen registration", () => {
     expect(component.navigate).not.toHaveBeenCalled();
   });
 
+  it("[AC-006] signs in via POST /auth/login, stores the token and routes attendees to events", async () => {
+    const { component } = setup();
+    component.tab.set("signin");
+    component.email.set("aarav.menon@gmail.com");
+    component.password.set("Mumbai2026");
+    const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockResolvedValue(jsonResponse(200, { token: "tok-attendee", role: "attendee" }));
+
+    component.signIn();
+    await vi.advanceTimersByTimeAsync(1000);
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/auth/login");
+    expect(init.method).toBe("POST");
+    const body = JSON.parse(init.body as string);
+    expect(body).toEqual({ email: "aarav.menon@gmail.com", password: "Mumbai2026" });
+
+    expect(getSessionToken()).toBe("tok-attendee");
+    expect(component.navigate).toHaveBeenCalledWith("events");
+  });
+
+  it("[AC-006] routes organizers to the organizer dashboard by returned role", async () => {
+    const { component } = setup();
+    component.tab.set("signin");
+    component.email.set("priya@sitarahouse.in");
+    component.password.set("Sitara2026");
+    const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockResolvedValue(jsonResponse(200, { token: "tok-organizer", role: "organizer" }));
+
+    component.signIn();
+    await vi.advanceTimersByTimeAsync(1000);
+
+    expect(getSessionToken()).toBe("tok-organizer");
+    expect(component.navigate).toHaveBeenCalledWith("organizer-dashboard");
+  });
+
+  it("[AC-007][NFR-002] a 401 shows one generic 'Email or password is incorrect' notice", async () => {
+    const { component } = setup();
+    component.tab.set("signin");
+    component.email.set("aarav.menon@gmail.com");
+    component.password.set("wrong-password");
+    const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockResolvedValue(jsonResponse(401, { message: "Unauthorized" }));
+
+    component.signIn();
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(component.formNotice().lines).toEqual(["Email or password is incorrect."]);
+    expect(component.formNotice().lines.join(" ")).not.toContain("email");
+    expect(component.formNotice().lines.join(" ")).not.toContain("password does not match");
+    expect(component.navigate).not.toHaveBeenCalled();
+  });
+
   it("[AC-003] 400 field errors from the API render as field-level messages under the matching input", async () => {
     const { component } = setup();
     fillAttendee(component);
