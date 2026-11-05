@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic event booking qpp
 
-**Documentation version:** v4
+**Documentation version:** v5
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -15,7 +15,7 @@ basic event booking qpp
 |---|---|
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 22 entries |
-| [Development](development/README.md) | 13 entries |
+| [Development](development/README.md) | 6 entries |
 | [Testing](testing/README.md) | 1 entry |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 1 entry |
@@ -24,14 +24,14 @@ basic event booking qpp
 | [Decisions (ADRs)](architecture/adr/README.md) | 4 decisions |
 | [Sprint plan](development/sprint-plan.md) | 5 sprints |
 | [Developer guide](development/developer-guide.md) | generated |
-| [API reference](development/api-reference.md) | 1 route |
+| [API reference](development/api-reference.md) | 14 routes |
 | [Test report](testing/test-report.md) | not run yet |
-| [Tests](testing/test-cases.md) | 0 tests |
+| [Tests](testing/test-cases.md) | 30 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 1 release |
 | [Traceability matrix](traceability-matrix.md) | 14 requirements |
-| [Changelog](CHANGELOG.md) | 4 versions |
+| [Changelog](CHANGELOG.md) | 5 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -59,20 +59,19 @@ basic event booking qpp
 
 ### Development
 
-- No record of actual sprint execution, completion dates, or velocity achieved against the planned capacity of 20 points/sprint.
-- No indication of who approved the plan or when.
-- No implementation status, test results, or completion confirmation provided for any Sprint 1 item.
-- No implementation status, test results, or completion confirmation provided for any Sprint 2 item.
-- No implementation status, test results, or completion confirmation provided for any Sprint 3 item or its subtasks.
-- No implementation status, test results, or completion confirmation provided for any Sprint 4 item or its subtasks.
-- No evidence yet that overselling protection (concurrency-safe reservation, stock release on failure) was actually verified.
-- No implementation status, test results, or completion confirmation provided for any Sprint 5 item or its subtasks.
-- No implementation or test evidence for this epic's stories.
-- Epic name references DPDP (India's Digital Personal Data Protection Act); no explicit compliance mapping/control documentation was provided beyond the two story titles.
-- No implementation or test evidence for this epic's story or its three tasks.
-- No implementation or test evidence for this epic's stories or tasks.
-- Payment/webhook flow (US-011-T3) and overselling protection (US-011-T1/T4) have no recorded verification.
-- No implementation or test evidence for this epic's story.
+- All 7 epics show role=(unassigned) in the plan input -- no owning agent/role recorded at epic level.
+- Companion story US-005 (Withdraw consent) has no delivery record yet, so DPDP consent-withdrawal capability cannot be confirmed as built.
+- No delivery/ticket record for US-005 (Withdraw consent).
+- No delivery/ticket record for US-006 (Create an event listing).
+- No delivery/ticket record for US-007 (Define general-admission ticket types).
+- No delivery/ticket record for US-008 or its sub-tasks US-008-T1/T2/T3 (organizer dashboard).
+- No delivery/ticket record for US-009 or its sub-tasks US-009-T1/T2/T3 (browse/search).
+- No delivery/ticket record for US-010 (event detail page).
+- No delivery/ticket record for US-011 or its sub-tasks US-011-T1/T2/T3/T4 (booking & payment, incl. overselling protection).
+- No delivery/ticket record for US-012 or its sub-tasks US-012-T1/T2 (QR ticket issuance).
+- No delivery/ticket record for US-013 (my tickets view).
+- No delivery/ticket record for US-014 (responsive web app).
+- 'Development run status: completed' conflicts with the absence of delivery data for 10 of 14 stories -- needs confirmation from the development agent or run log before this phase can be considered fully documented.
 
 ### Testing
 

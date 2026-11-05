@@ -7,81 +7,78 @@ _Up to date._
 <!-- sdlc:auto:end status -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `f22edbe` · model `claude-sonnet-5`
+Generated from commit `4a1a709` · model `claude-sonnet-5`
 <!-- sdlc:auto:end source -->
 
 <!-- sdlc:auto:start overview -->
-eventbooking2 is a generated two-app repository: an approved Angular 22 frontend (built with Vite via the Analog plugin) that currently renders seeded sample data for every reviewed screen, and a Spring Boot 4.1 (Java 21, Maven) backend that at this point only exposes a /health endpoint and stub/service classes, with no approved architecture built out yet. The approved stack target is Angular + Spring Boot + PostgreSQL on AWS, and docker-compose provides local Postgres, Meilisearch, and Redis services for future backend work.
+eventbooking2 is a Quorq-generated two-app repository for a basic event booking product. The frontend is an Angular 22 app (built with Vite via the Analog plugin) containing every approved screen, currently running on seeded sample data rather than live API calls. The backend is a Spring Boot 4.1 (Java 21, Maven) service that currently implements only health checks, registration/login/logout and consent-withdrawal (via AuthService, JWT, and optional Redis-backed token revocation); every other declared API route (events, orders, tickets, organizer dashboard) is a placeholder stub. Postgres (or an in-memory H2 fallback), Meilisearch and Redis are the supporting services the architecture expects, wired up locally via docker-compose.
 <!-- sdlc:auto:end overview -->
 
 <!-- sdlc:auto:start prerequisites -->
-- Node.js and npm (for the Angular/Vite frontend)
-- Java 21 (backend uses the bundled Maven wrapper, no separate Maven install required)
-- Docker and Docker Compose (for the Postgres/Meilisearch/Redis services in docker-compose.yml, and for building the backend's Docker image)
+- Node.js (for npm, Vite, Angular 22 tooling)
+- Java 21 JDK (backend uses Maven wrapper, no local Maven install required)
+- Docker and Docker Compose (for Postgres, Meilisearch, Redis via docker-compose.yml)
 <!-- sdlc:auto:end prerequisites -->
 
 <!-- sdlc:auto:start setup -->
 1. Clone the repository
-2. Copy .env.example to .env and fill in any required values
-3. cd frontend && npm install
-4. cd backend && sh mvnw dependency:go-offline (optional, pre-fetches dependencies)
-5. Optionally run docker compose up -d from the repo root to start Postgres, Meilisearch, and Redis for the backend
+2. cd frontend && npm install
+3. (optional, from repo root) docker compose up -d  # starts Postgres, Meilisearch, and two Redis instances
+4. cd backend && sh mvnw spring-boot:run  # with no DATABASE_URL set it falls back to an in-memory H2 database
+5. In a separate terminal: cd frontend && npm run dev
 <!-- sdlc:auto:end setup -->
 
 <!-- sdlc:auto:start run -->
 | Name | Command | Description |
 |---|---|---|
-| frontend dev | `npm run dev` | Starts the Vite dev server for the Angular/Analog frontend (run from frontend/) |
-| frontend build | `npm run build` | Compiles the Angular components ahead-of-time via the Analog Vite plugin and bundles the app |
+| frontend dev | `npm run dev` | Starts the Vite/Analog dev server for the Angular frontend (run from frontend/) |
+| frontend build | `npm run build` | Ahead-of-time compiles the Angular components and bundles the app for production |
 | frontend preview | `npm run preview` | Serves the production build locally |
-| frontend typecheck | `npm run typecheck` | Runs the Angular compiler (ngc) over the app, including templates |
-| backend run | `sh mvnw spring-boot:run` | Starts the Spring Boot API (run from backend/); falls back to an in-memory H2 database if DATABASE_URL is not set |
-| docker services | `docker compose up -d` | Starts Postgres, Meilisearch, and Redis containers defined in docker-compose.yml |
+| backend run | `sh mvnw spring-boot:run` | Starts the Spring Boot API on port 8000 (run from backend/) |
+| docker services | `docker compose up -d` | Starts Postgres 16, Meilisearch, and two Redis instances defined in docker-compose.yml |
 <!-- sdlc:auto:end run -->
 
 <!-- sdlc:auto:start structure -->
 | Path | Purpose |
 |---|---|
-| `.devcontainer` | VS Code/Codespaces development container configuration |
-| `.quorq` | Quorq AI SDLC platform metadata (handoff.json) |
+| `.devcontainer` | VS Code / Codespaces container configuration |
+| `.quorq` | Quorq platform metadata (handoff.json, prepared.json) describing how this repo was generated/handed off |
 | `backend` | Spring Boot (Java 21, Maven) API service |
-| `backend/src/main/java/app` | Application entry point, health controller, config, and service/stub classes |
-| `backend/src/main/resources` | Spring configuration (application.properties) |
-| `backend/src/test/java/app` | JUnit tests for the backend |
-| `backend/docker` | HealthCheck.java, compiled into the Docker image for the container HEALTHCHECK |
-| `frontend` | Angular 22 app (Vite + Analog) rendering the approved, seeded-data screens |
-| `frontend/src` | Angular source: screens, app shell/routes, shared lib (api, ui, icons, navigate, screen-base), styles |
-| `frontend/e2e` | Playwright end-to-end specs |
+| `backend/src/main/java/app` | Application entry point, controllers (HealthController, ApiController), auth, security, and model (JPA entity) packages |
+| `backend/src/test` | JUnit unit and integration (*IT) tests for the backend |
+| `frontend` | Angular 22 app (Vite + Analog) containing all approved UI screens |
+| `frontend/src/screens` | One standalone Angular component per approved screen, each paired with a .spec.ts test |
+| `frontend/src/lib` | Shared API client (api.ts), UI kit, icons, brand tokens, and screen-base helpers used by every screen |
+| `frontend/e2e` | Playwright acceptance tests |
+| `docker-compose.yml` | Local supporting services: Postgres 16, Meilisearch, and two Redis instances |
 <!-- sdlc:auto:end structure -->
 
 <!-- sdlc:auto:start conventions -->
-- Frontend: one component per approved screen under src/screens/ (per frontend/README.md)
-- Frontend: app.component.ts holds the navigation shell and route table
-- Frontend: screens extend shared lib helpers (screen-base.ts for navigate/brand, ui.ts/icons.ts for shared directives/components/icons)
-- Frontend: brand tokens live in src/lib/brand.ts and as CSS variables in src/index.css
-- Frontend: component tests sit beside the component they cover (x.component.spec.ts next to x.component.ts), run by Vitest
-- Frontend: all API access is centralized in src/lib/api.ts (apiFetch) with a bearer token (session token or shared secret); screens do not yet call it, using seeded sample data instead
-- Backend: Spring Boot conventions - single package app, ddl-auto=update for JPA schema, globally quoted Hibernate identifiers
-- Backend code style enforced via Spotless (Google Java Format) and Checkstyle (checkstyle.xml)
+- Frontend screens are standalone Angular components under src/screens/, one per approved screen, each with a colocated x.component.spec.ts test
+- All API calls are meant to go through apiFetch (frontend/src/lib/api.ts), which attaches the bearer token (session token or shared secret) and resolves against API_BASE_URL
+- screen-base.ts supplies shared navigate/brand utilities to every screen component
+- Backend declares all API routes in a single ApiController; unimplemented endpoints return a placeholder via Stubs.notImplemented, while implemented ones (auth, consent) delegate to AuthService
+- Backend JPA entities use explicit @Column mappings matching snake_case DB column names against camelCase Java fields
+- Backend code style is enforced via Spotless (Google Java Format) and Checkstyle; frontend via ESLint and Prettier
 <!-- sdlc:auto:end conventions -->
 
 <!-- sdlc:auto:start testing -->
 | Name | Command | Description |
 |---|---|---|
-| frontend unit tests | `npm run test` | Runs Vitest component tests (Angular TestBed) in jsdom |
-| frontend lint | `npm run lint` | Runs ESLint over the frontend app (gate used by the platform) |
-| frontend format check | `npm run format:check` | Checks Prettier formatting without writing changes |
-| frontend e2e | `npm run test:e2e` | Runs Playwright acceptance tests from e2e/; builds/serves the frontend and backend locally unless E2E_BASE_URL is set |
-| backend tests | `sh mvnw test` | Runs backend JUnit tests (including *IT integration tests) with JaCoCo coverage |
+| frontend unit tests | `npm test` | Runs Vitest component tests with Angular's TestBed (from frontend/) |
+| frontend lint | `npm run lint` | Runs ESLint over the frontend app; used as a development gate |
+| frontend e2e | `npm run test:e2e` | Runs Playwright acceptance tests from frontend/e2e; builds/serves the app (and the backend) locally unless E2E_BASE_URL is set |
+| e2e browser install | `npm run test:e2e:install` | Fetches the Chromium browser Playwright needs, before first e2e run |
+| backend tests | `sh mvnw test` | Runs backend JUnit unit and integration (*IT) tests with JaCoCo coverage (from backend/) |
 | backend style checks | `sh mvnw checkstyle:check spotless:check` | Verifies backend code against Checkstyle rules and Spotless formatting |
-| backend auto-format | `sh mvnw spotless:apply` | Applies Spotless (Google Java Format) fixes to backend code |
 <!-- sdlc:auto:end testing -->
 
 <!-- sdlc:auto:start troubleshooting -->
 | Problem | Solution |
 |---|---|
-| docker compose up fails or Redis containers conflict | docker-compose.yml maps both the redis and redis-queue services to host port 6379; only one can bind that port at a time, so adjust the port mapping for one of them before starting both |
-| Backend fails to start without a database | No DATABASE_URL is required for local dev: application.properties/DatabaseUrlEnvironmentPostProcessor let the app fall back to the bundled in-memory H2 database; set DATABASE_URL to point at the docker-compose Postgres instance to use it instead |
-| npm run test:e2e is slow or fails on first run | Without E2E_BASE_URL set, Playwright's webServer config builds and runs both the backend (via mvnw package) and the frontend (vite build + preview) before testing, which takes time on a cold Maven/npm cache; run npm run test:e2e:install first to fetch the Chromium browser |
-| npm run build succeeds but npm run typecheck fails | vite build tree-shakes unused modules (e.g. src/lib/api.ts) so type errors like missing import.meta.env types can slip through; run npm run typecheck (ngc) to catch template and full-project type errors |
+| Backend fails to connect to a database on startup | Without a DATABASE_URL set it falls back automatically to an in-memory H2 database; if DATABASE_URL is set, ensure Postgres is running first via `docker compose up -d` |
+| Sign-out / session revocation doesn't behave as expected | Redis (REDIS_URL) is optional for early token revocation; login and logout still function without it, just without immediate revocation, if Redis is unset or unreachable |
+| Frontend screens show no live data or fail API calls | Screens currently render seeded sample data and are not yet wired to the backend; set VITE_API_BASE_URL if testing against a real API via lib/api.ts's apiFetch |
+| Playwright e2e tests fail to start a browser | Run `npm run test:e2e:install` once to fetch Chromium before running `npm run test:e2e` |
+| JWT-signed sessions behave unexpectedly across restarts | app.jwt.secret defaults to an insecure dev-only value (JWT_SECRET_KEY); set JWT_SECRET_KEY explicitly for any non-local run |
 <!-- sdlc:auto:end troubleshooting -->

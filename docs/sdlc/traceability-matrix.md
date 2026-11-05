@@ -9,10 +9,10 @@ Built from recorded links, not written by a model: requirement key → plan item
 <!-- sdlc:auto:start matrix -->
 | Requirement | Epic | Title | Plan items | Sprint | Design | Code | Commits | Ticket | Tests | AC tests | Deployed |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| US-001 | EPIC-001 | Attendee self-registration | US-001 | 1 | POST /auth/register, api_backend, db, users, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-002 | EPIC-001 | Organizer self-registration | US-002 | 1 | POST /auth/register, api_backend, db, organizer_profiles, users, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
-| US-003 | EPIC-001 | Secure sign-in and sign-out | US-003 | 1 | POST /auth/login, POST /auth/logout, api_backend, db, users, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
-| US-004 | EPIC-002 | Explicit consent capture at signup | US-004 | 1 | POST /auth/register, api_backend, consent_records, db, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
+| US-001 | EPIC-001 | Attendee self-registration | US-001 | 1 | POST /auth/register, api_backend, db, users, web_app | backend/src/main/java/app/SecurityConfig.java, backend/src/main/java/app/api/ApiController.java, backend/src/main/java/app/auth/AuthService.java, backend/src/main/java/app/auth/ConsentNotice.java, backend/src/main/java/app/auth/EmailInUseException.java +13 more | a97029a | delivered | not run | 3/3 tested · 3/3 passing | — |
+| US-002 | EPIC-001 | Organizer self-registration | US-002 | 1 | POST /auth/register, api_backend, db, organizer_profiles, users, web_app | — | a97029a | delivered | not run | 2/2 tested · 2/2 passing | — |
+| US-003 | EPIC-001 | Secure sign-in and sign-out | US-003 | 1 | POST /auth/login, POST /auth/logout, api_backend, db, users, web_app | backend/src/main/java/app/api/ApiController.java, backend/src/main/java/app/auth/AuthService.java, backend/src/main/java/app/auth/InvalidCredentialsException.java, backend/src/main/java/app/auth/LoginRequest.java, backend/src/main/java/app/model/AuditLog.java +8 more | 6c03935 | delivered | not run | 3/3 tested · 3/3 passing | — |
+| US-004 | EPIC-002 | Explicit consent capture at signup | US-004 | 1 | POST /auth/register, api_backend, consent_records, db, web_app | — | a97029a | delivered | not run | 2/3 tested · 2/3 passing | — |
 | US-005 | EPIC-002 | Withdraw consent | US-005 | 2 | POST /consent/withdraw, api_backend, consent_records, db, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
 | US-006 | EPIC-003 | Create an event listing | US-006 | 2 | POST /events, api_backend, db, events, web_app | — | — | not started | not run | 0/2 tested · 0/2 passing | — |
 | US-007 | EPIC-003 | Define general-admission ticket types | US-007 | 2 | POST /events/{id}/ticket-types, api_backend, db, ticket_types, web_app | — | — | not started | not run | 0/3 tested · 0/3 passing | — |
