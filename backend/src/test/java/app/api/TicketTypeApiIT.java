@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import app.model.TicketType;
 import app.model.TicketTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -24,9 +23,9 @@ import org.springframework.test.web.servlet.MvcResult;
  * Integration tests for POST /events/{id}/ticket-types and GET /events/{id} (US-007).
  *
  * <p>NFR-005 (data stored in India / AWS Mumbai region) is infrastructure/ops configuration, not
- * observable through the API in this sandbox; not asserted here. NFR-006's 180-day retention
- * target is likewise an ops setting outside API scope; the audit-row-with-timestamp part is
- * already covered by {@code EventApiIT#testEventMutationWritesAuditLogRowWithTimestamp}.
+ * observable through the API in this sandbox; not asserted here. NFR-006's 180-day retention target
+ * is likewise an ops setting outside API scope; the audit-row-with-timestamp part is already
+ * covered by {@code EventApiIT#testEventMutationWritesAuditLogRowWithTimestamp}.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -47,9 +46,11 @@ class TicketTypeApiIT {
   @Test
   void testAc016OwnerAddsTicketTypeAndItAppearsForSaleOnTheEvent() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "owner016@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "owner016@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
 
     mockMvc
         .perform(
@@ -73,9 +74,11 @@ class TicketTypeApiIT {
   @Test
   void testAc017TwoTicketTypesHoldIndependentQuantities() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "owner017@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "owner017@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
 
     MvcResult regularResult =
         mockMvc
@@ -83,7 +86,8 @@ class TicketTypeApiIT {
                 post("/events/" + eventId + "/ticket-types")
                     .header("Authorization", "Bearer " + token)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(ticketTypeBody("Regular", "300.00", 10))))
+                    .content(
+                        objectMapper.writeValueAsString(ticketTypeBody("Regular", "300.00", 10))))
             .andExpect(status().isCreated())
             .andReturn();
     String regularId =
@@ -111,7 +115,8 @@ class TicketTypeApiIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.ticketTypes.length()").value(2))
             .andReturn();
-    var ticketTypes = objectMapper.readTree(detail.getResponse().getContentAsString()).get("ticketTypes");
+    var ticketTypes =
+        objectMapper.readTree(detail.getResponse().getContentAsString()).get("ticketTypes");
     boolean foundRegular = false;
     boolean foundVip = false;
     for (var tt : ticketTypes) {
@@ -134,9 +139,11 @@ class TicketTypeApiIT {
   @Test
   void testAc018RequestAndResponseHaveNoSeatFields() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "owner018@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "owner018@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
 
     MvcResult createResult =
         mockMvc
@@ -159,9 +166,11 @@ class TicketTypeApiIT {
   @Test
   void testGetEventByIdReturnsVenueCityDateDescriptionAndSoldOutFlags() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "owner-detail@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "owner-detail@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
 
     MvcResult createResult =
         mockMvc
@@ -169,7 +178,8 @@ class TicketTypeApiIT {
                 post("/events/" + eventId + "/ticket-types")
                     .header("Authorization", "Bearer " + token)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(ticketTypeBody("SoldOut", "100.00", 1))))
+                    .content(
+                        objectMapper.writeValueAsString(ticketTypeBody("SoldOut", "100.00", 1))))
             .andExpect(status().isCreated())
             .andReturn();
     String ticketTypeId =
@@ -195,9 +205,11 @@ class TicketTypeApiIT {
   @Test
   void testBlankNameReturns400WithFieldErrorAndPersistsNothing() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "invalid-name@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "invalid-name@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
     long before = ticketTypeRepository.count();
 
     mockMvc
@@ -215,9 +227,11 @@ class TicketTypeApiIT {
   @Test
   void testZeroPriceReturns400WithFieldErrorAndPersistsNothing() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "invalid-zero-price@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "invalid-zero-price@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
     long before = ticketTypeRepository.count();
 
     mockMvc
@@ -235,9 +249,11 @@ class TicketTypeApiIT {
   @Test
   void testNegativePriceReturns400WithFieldErrorAndPersistsNothing() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "invalid-neg-price@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "invalid-neg-price@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
     long before = ticketTypeRepository.count();
 
     mockMvc
@@ -255,9 +271,11 @@ class TicketTypeApiIT {
   @Test
   void testZeroQuantityReturns400WithFieldErrorAndPersistsNothing() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "invalid-zero-qty@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "invalid-zero-qty@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
     long before = ticketTypeRepository.count();
 
     mockMvc
@@ -275,9 +293,11 @@ class TicketTypeApiIT {
   @Test
   void testNegativeQuantityReturns400WithFieldErrorAndPersistsNothing() throws Exception {
     String token =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "invalid-neg-qty@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "invalid-neg-qty@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, token, EventTestHelpers.validEventBody());
     long before = ticketTypeRepository.count();
 
     mockMvc
@@ -295,11 +315,14 @@ class TicketTypeApiIT {
   @Test
   void testNonOwnerAddingTicketTypeReceives403AndPersistsNothing() throws Exception {
     String ownerToken =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "owner-403@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "owner-403@example.com", "organizer");
     String otherToken =
-        EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, "other-403@example.com", "organizer");
+        EventTestHelpers.registerAndGetToken(
+            mockMvc, objectMapper, "other-403@example.com", "organizer");
     String eventId =
-        EventTestHelpers.createEvent(mockMvc, objectMapper, ownerToken, EventTestHelpers.validEventBody());
+        EventTestHelpers.createEvent(
+            mockMvc, objectMapper, ownerToken, EventTestHelpers.validEventBody());
     long before = ticketTypeRepository.count();
 
     mockMvc
