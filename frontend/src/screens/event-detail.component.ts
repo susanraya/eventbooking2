@@ -2,7 +2,6 @@
 
 import { Component, OnInit, OnDestroy, signal, computed, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { FormsModule } from "@angular/forms";
 
 import { apiFetch } from "@/lib/api";
 import { ScreenBase } from "@/lib/screen-base";
@@ -445,7 +444,7 @@ const template = `
 
 @Component({
   selector: "app-event-detail-screen",
-  imports: [...UI_KIT, FormsModule],
+  imports: [...UI_KIT],
   template,
 })
 export default class Screen extends ScreenBase implements OnInit, OnDestroy {

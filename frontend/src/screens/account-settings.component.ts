@@ -1,7 +1,6 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
 
 import { Component, signal, computed, effect } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 
 import { apiFetch } from "@/lib/api";
 import { ScreenBase } from "@/lib/screen-base";
@@ -355,7 +354,7 @@ const template = `
 
 @Component({
   selector: "app-account-settings-screen",
-  imports: [...UI_KIT, FormsModule],
+  imports: [...UI_KIT],
   template,
 })
 export default class Screen extends ScreenBase {

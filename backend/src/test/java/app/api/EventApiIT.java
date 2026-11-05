@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
@@ -30,53 +31,13 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 class EventApiIT {
 
-  @Autowired private org.springframework.test.web.servlet.MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
   private final ObjectMapper objectMapper = new ObjectMapper();
   @Autowired private EventRepository eventRepository;
   @Autowired private AuditLogRepository auditLogRepository;
 
-  private Map<String, Object> registerBody(String email, String role) {
-    Map<String, Object> body = new HashMap<>();
-    body.put("email", email);
-    body.put("password", "password1");
-    body.put("fullName", "Test " + role);
-    body.put("phone", "9876543210");
-    body.put("role", role);
-    body.put("consentGiven", true);
-    body.put("noticeVersion", "2026-01");
-    if ("organizer".equals(role)) {
-      body.put("organizationName", "Acme Events");
-      body.put("contactDetails", "contact@acme.example");
-    }
-    return body;
-  }
-
   private String registerAndGetToken(String email, String role) throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                post("/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(registerBody(email, role))))
-            .andExpect(status().isCreated())
-            .andReturn();
-    return objectMapper
-        .readTree(result.getResponse().getContentAsString())
-        .get("token")
-        .asText();
-  }
-
-  private Map<String, Object> validEventBody() {
-    Map<String, Object> body = new HashMap<>();
-    body.put("title", "Music Night");
-    body.put("venue", "Open Grounds");
-    body.put("city", "Mumbai");
-    body.put("category", "music");
-    body.put("description", "An evening of live music.");
-    body.put("startsAt", "2026-12-01T18:00:00");
-    body.put("posterUrl", null);
-    body.put("status", "published");
-    return body;
+    return EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, email, role);
   }
 
   @Test
@@ -89,12 +50,15 @@ class EventApiIT {
                 post("/events")
                     .header("Authorization", "Bearer " + token)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(validEventBody())))
+                    .content(objectMapper.writeValueAsString(EventTestHelpers.validEventBody())))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.eventId").isNotEmpty())
             .andReturn();
     String eventId =
-        objectMapper.readTree(createResult.getResponse().getContentAsString()).get("eventId").asText();
+        objectMapper
+            .readTree(createResult.getResponse().getContentAsString())
+            .get("eventId")
+            .asText();
 
     mockMvc
         .perform(get("/events/" + eventId))
@@ -107,7 +71,7 @@ class EventApiIT {
   void testAc015MissingTitleReturns400WithFieldErrorAndNoRowPersisted() throws Exception {
     String token = registerAndGetToken("organizer-ac015a@example.com", "organizer");
     long before = eventRepository.count();
-    Map<String, Object> body = new HashMap<>(validEventBody());
+    Map<String, Object> body = new HashMap<>(EventTestHelpers.validEventBody());
     body.remove("title");
 
     mockMvc
@@ -126,7 +90,7 @@ class EventApiIT {
   void testAc015MissingVenueReturns400WithFieldErrorAndNoRowPersisted() throws Exception {
     String token = registerAndGetToken("organizer-ac015b@example.com", "organizer");
     long before = eventRepository.count();
-    Map<String, Object> body = new HashMap<>(validEventBody());
+    Map<String, Object> body = new HashMap<>(EventTestHelpers.validEventBody());
     body.remove("venue");
 
     mockMvc
@@ -145,7 +109,7 @@ class EventApiIT {
   void testAc015MissingCityReturns400WithFieldErrorAndNoRowPersisted() throws Exception {
     String token = registerAndGetToken("organizer-ac015c@example.com", "organizer");
     long before = eventRepository.count();
-    Map<String, Object> body = new HashMap<>(validEventBody());
+    Map<String, Object> body = new HashMap<>(EventTestHelpers.validEventBody());
     body.remove("city");
 
     mockMvc
@@ -164,7 +128,7 @@ class EventApiIT {
   void testAc015MissingStartsAtReturns400WithFieldErrorAndNoRowPersisted() throws Exception {
     String token = registerAndGetToken("organizer-ac015d@example.com", "organizer");
     long before = eventRepository.count();
-    Map<String, Object> body = new HashMap<>(validEventBody());
+    Map<String, Object> body = new HashMap<>(EventTestHelpers.validEventBody());
     body.remove("startsAt");
 
     mockMvc
@@ -183,7 +147,7 @@ class EventApiIT {
   void testAc015MissingCategoryReturns400WithFieldErrorAndNoRowPersisted() throws Exception {
     String token = registerAndGetToken("organizer-ac015e@example.com", "organizer");
     long before = eventRepository.count();
-    Map<String, Object> body = new HashMap<>(validEventBody());
+    Map<String, Object> body = new HashMap<>(EventTestHelpers.validEventBody());
     body.remove("category");
 
     mockMvc
@@ -202,7 +166,7 @@ class EventApiIT {
   void testAc015MissingDescriptionReturns400WithFieldErrorAndNoRowPersisted() throws Exception {
     String token = registerAndGetToken("organizer-ac015f@example.com", "organizer");
     long before = eventRepository.count();
-    Map<String, Object> body = new HashMap<>(validEventBody());
+    Map<String, Object> body = new HashMap<>(EventTestHelpers.validEventBody());
     body.remove("description");
 
     mockMvc
@@ -220,7 +184,7 @@ class EventApiIT {
   @Test
   void testAc015InvalidStartsAtReturns400WithFieldError() throws Exception {
     String token = registerAndGetToken("organizer-ac015g@example.com", "organizer");
-    Map<String, Object> body = new HashMap<>(validEventBody());
+    Map<String, Object> body = new HashMap<>(EventTestHelpers.validEventBody());
     body.put("startsAt", "not-a-date");
 
     mockMvc
@@ -245,13 +209,16 @@ class EventApiIT {
                 post("/events")
                     .header("Authorization", "Bearer " + ownerToken)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(validEventBody())))
+                    .content(objectMapper.writeValueAsString(EventTestHelpers.validEventBody())))
             .andExpect(status().isCreated())
             .andReturn();
     String eventId =
-        objectMapper.readTree(createResult.getResponse().getContentAsString()).get("eventId").asText();
+        objectMapper
+            .readTree(createResult.getResponse().getContentAsString())
+            .get("eventId")
+            .asText();
 
-    Map<String, Object> maliciousUpdate = new HashMap<>(validEventBody());
+    Map<String, Object> maliciousUpdate = new HashMap<>(EventTestHelpers.validEventBody());
     maliciousUpdate.put("title", "Hijacked Title");
 
     mockMvc
@@ -267,7 +234,7 @@ class EventApiIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.event.title").value("Music Night"));
 
-    Map<String, Object> ownerUpdate = new HashMap<>(validEventBody());
+    Map<String, Object> ownerUpdate = new HashMap<>(EventTestHelpers.validEventBody());
     ownerUpdate.put("title", "Updated By Owner");
 
     mockMvc
@@ -301,7 +268,7 @@ class EventApiIT {
             post("/events")
                 .header("Authorization", "Bearer " + tokenA)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validEventBody())))
+                .content(objectMapper.writeValueAsString(EventTestHelpers.validEventBody())))
         .andExpect(status().isCreated());
 
     mockMvc
@@ -322,7 +289,7 @@ class EventApiIT {
         .perform(
             post("/events")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validEventBody())))
+                .content(objectMapper.writeValueAsString(EventTestHelpers.validEventBody())))
         .andExpect(status().isUnauthorized());
   }
 
@@ -332,7 +299,7 @@ class EventApiIT {
         .perform(
             put("/events/some-id")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validEventBody())))
+                .content(objectMapper.writeValueAsString(EventTestHelpers.validEventBody())))
         .andExpect(status().isUnauthorized());
   }
 
@@ -352,11 +319,14 @@ class EventApiIT {
                 post("/events")
                     .header("Authorization", "Bearer " + token)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(validEventBody())))
+                    .content(objectMapper.writeValueAsString(EventTestHelpers.validEventBody())))
             .andExpect(status().isCreated())
             .andReturn();
     String eventId =
-        objectMapper.readTree(createResult.getResponse().getContentAsString()).get("eventId").asText();
+        objectMapper
+            .readTree(createResult.getResponse().getContentAsString())
+            .get("eventId")
+            .asText();
 
     Assertions.assertTrue(auditLogRepository.count() > auditsBefore);
     var createLog =
@@ -372,7 +342,7 @@ class EventApiIT {
             put("/events/" + eventId)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(validEventBody())))
+                .content(objectMapper.writeValueAsString(EventTestHelpers.validEventBody())))
         .andExpect(status().isOk());
 
     Assertions.assertTrue(auditLogRepository.count() > auditsAfterCreate);

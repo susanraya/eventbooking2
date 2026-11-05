@@ -8,15 +8,12 @@ import app.model.AuditLogRepository;
 import app.model.ConsentRecordRepository;
 import app.model.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Integration tests for POST /consent/withdraw (US-005-2), beyond the baseline happy-path and
@@ -24,8 +21,8 @@ import org.springframework.test.web.servlet.MvcResult;
  * users, and the audit row's actor/timestamp (NFR-006).
  *
  * <p>NFR-005 (data stored in India / AWS Mumbai region) and the 180-day log retention target of
- * NFR-006 are infrastructure/ops configuration, not observable through this API in the sandbox;
- * not asserted here.
+ * NFR-006 are infrastructure/ops configuration, not observable through this API in the sandbox; not
+ * asserted here.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,27 +34,8 @@ class ConsentWithdrawalIT {
   @Autowired private ConsentRecordRepository consentRecordRepository;
   @Autowired private AuditLogRepository auditLogRepository;
 
-  private Map<String, Object> attendeeBody(String email) {
-    return Map.of(
-        "email", email,
-        "password", "password1",
-        "fullName", "Jane Attendee",
-        "phone", "9876543210",
-        "role", "attendee",
-        "consentGiven", true,
-        "noticeVersion", "2026-01");
-  }
-
   private String registerAndGetToken(String email) throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                post("/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(attendeeBody(email))))
-            .andExpect(status().isCreated())
-            .andReturn();
-    return objectMapper.readTree(result.getResponse().getContentAsString()).get("token").asText();
+    return EventTestHelpers.registerAndGetToken(mockMvc, objectMapper, email, "attendee");
   }
 
   @Test

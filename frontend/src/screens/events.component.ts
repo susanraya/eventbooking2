@@ -1,5 +1,5 @@
 // @ts-nocheck -- generated from the approved design under its plain-JavaScript contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Component, signal, computed } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
@@ -163,7 +163,6 @@ const template = `
 
                     <h3 class="text-base leading-snug" [style.font-family]="brand.fontHeading">
                       <button type="button"
-                              [attr.data-wf]="wf(e)"
                               (click)="openEvent(e)"
                               [attr.aria-label]="'View ' + e.title + ', ' + e.starts_label + ' at ' + e.venue"
                               class="text-left uppercase after:absolute after:inset-0 after:content-[&quot;&quot;] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
@@ -255,13 +254,6 @@ export default class Screen extends ScreenBase {
     { value: "jan", label: "1–31 Jan 2027" },
   ];
   skeletons = [1, 2, 3, 4, 5, 6];
-
-  wfByEventId = {
-    "e-4821": "i-4-0-0",
-    "e-4833": "i-4-0-1",
-    "e-4807": "i-4-0-2",
-    "e-4866": "i-4-0-3",
-  };
 
   allEvents = [
     {
@@ -743,10 +735,6 @@ export default class Screen extends ScreenBase {
 
   money(n) {
     return "₹" + Number(n).toLocaleString("en-IN");
-  }
-
-  wf(e) {
-    return this.wfByEventId[e.id] || null;
   }
 
   openEvent(e) {
