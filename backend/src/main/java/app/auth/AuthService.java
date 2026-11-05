@@ -73,7 +73,7 @@ public class AuthService {
     if (!errors.isEmpty()) {
       throw new ValidationErrorException(errors);
     }
-    String email = request.email().strip().toLowerCase(java.util.Locale.ROOT);
+    String email = request.email().strip().toLowerCase(Locale.ROOT);
     if (userRepository.findByEmail(email).isPresent()) {
       throw new EmailInUseException(email);
     }
@@ -108,8 +108,7 @@ public class AuthService {
 
     audit(user, "user.register", "users", user.getId(), ipAddress);
 
-    String token = jwtService.issue(user.getId(), user.getEmail(), user.getRole());
-    return new RegisterResult(user, token);
+    return new RegisterResult(user, issueToken(user));
   }
 
   /** The outcome of a successful sign-in: the user, their session token, and a routing hint. */
@@ -129,9 +128,12 @@ public class AuthService {
       throw new InvalidCredentialsException();
     }
     audit(user, "user.login", "users", user.getId(), ipAddress, "success");
-    String token = jwtService.issue(user.getId(), user.getEmail(), user.getRole());
     String home = "organizer".equals(user.getRole()) ? "organizer-dashboard" : "events";
-    return new LoginResult(user, token, home);
+    return new LoginResult(user, issueToken(user), home);
+  }
+
+  private String issueToken(User user) {
+    return jwtService.issue(user.getId(), user.getEmail(), user.getRole());
   }
 
   /**
@@ -139,10 +141,7 @@ public class AuthService {
    * exactly the token's remaining lifetime, so a later call with the same token is rejected.
    */
   public void logout(String authorizationHeader, String ipAddress) {
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "missing bearer token");
-    }
-    String token = authorizationHeader.substring("Bearer ".length()).strip();
+    String token = extractBearerToken(authorizationHeader);
     Jws<Claims> parsed;
     try {
       parsed = jwtService.parse(token);
@@ -161,10 +160,7 @@ public class AuthService {
 
   /** The caller identified by a verified {@code Authorization: Bearer} token; fails closed. */
   public User requireUser(String authorizationHeader) {
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "missing bearer token");
-    }
-    String token = authorizationHeader.substring("Bearer ".length()).strip();
+    String token = extractBearerToken(authorizationHeader);
     String userId;
     try {
       userId = jwtService.parse(token).getPayload().getSubject();
@@ -188,6 +184,17 @@ public class AuthService {
     consentRecordRepository.save(consent);
     audit(user, "consent.withdraw", "consent_records", consent.getId(), ipAddress);
     return withdrawnAt;
+  }
+
+  /**
+   * The bearer token from {@code Authorization}; fails closed when the header is missing or
+   * malformed.
+   */
+  private String extractBearerToken(String authorizationHeader) {
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "missing bearer token");
+    }
+    return authorizationHeader.substring("Bearer ".length()).strip();
   }
 
   private void audit(User actor, String action, String entity, String entityId, String ipAddress) {

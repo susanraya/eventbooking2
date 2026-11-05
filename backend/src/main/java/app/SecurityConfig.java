@@ -10,18 +10,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Spring Security is on the classpath for the JWT-based auth the approved API spec requires
- * (US-001, US-002, US-003, US-008, US-012, US-013), but no endpoint is implemented yet -- every
- * handler in {@code app.api} is still a stub. Securing them now, ahead of a real {@code
- * Authorization: Bearer} filter, would only lock the health check and every stub behind Spring
- * Security's generated-password form login and break the baseline this scaffold must leave green.
- *
- * <p>This configuration disables that default and permits every request. A ticket that implements
- * an endpoint requiring auth (JWT or webhook-signature) adds the real check there -- a {@code
- * JwtAuthenticationFilter} reading {@code JWT_SECRET_KEY}, or a signature check on the Razorpay
- * webhook body -- and narrows {@code authorizeHttpRequests} accordingly. CSRF is disabled because
- * this is a stateless JSON API authenticated by bearer token, never by cookie (the frontend and the
- * API are always on different origins once deployed).
+ * Session enforcement for the JWT-based auth the approved API spec requires (US-001, US-002,
+ * US-003, US-008, US-012, US-013) lives in {@link app.security.JwtAuthenticationFilter}, a plain
+ * servlet filter Spring Boot registers independently of this chain; a webhook endpoint instead
+ * verifies the Razorpay signature on its own body. This configuration only disables Spring
+ * Security's defaults -- generated-password form login, HTTP Basic, and session cookies -- so they
+ * never interfere with that filter or the stub handlers in {@code app.api} still awaiting one. CSRF
+ * is disabled because this is a stateless JSON API authenticated by bearer token, never by cookie
+ * (the frontend and the API are always on different origins once deployed).
  */
 @Configuration
 @EnableWebSecurity
